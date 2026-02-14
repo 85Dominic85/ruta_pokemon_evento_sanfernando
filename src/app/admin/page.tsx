@@ -124,6 +124,21 @@ export default function AdminPage() {
         setTimeout(() => setMessage(""), 3000);
     };
 
+    const handleDeleteParticipant = async (participantId: string, nick: string) => {
+        if (!confirm(`¿Seguro que quieres ELIMINAR a "${nick}"? Se borrarán todas sus capturas y datos. Esta acción no se puede deshacer.`)) return;
+        const res = await fetch("/api/admin/delete-participant", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ participantId }),
+            credentials: "include",
+        });
+        const data = await res.json();
+        setMessage(data.message || data.error || "Hecho");
+        fetchParticipants(search, page);
+        fetchMetrics();
+        setTimeout(() => setMessage(""), 4000);
+    };
+
     const handleVerify = async () => {
         const res = await fetch("/api/admin/verify-finish", {
             method: "POST",
@@ -331,25 +346,34 @@ export default function AdminPage() {
                                                 )}
                                             </td>
                                             <td>
-                                                <select
-                                                    onChange={(e) => {
-                                                        const pokemonId = parseInt(e.target.value);
-                                                        if (pokemonId) handleGrant(p.email, pokemonId);
-                                                        e.target.value = "";
-                                                    }}
-                                                    className="input-field"
-                                                    style={{ padding: "4px 8px", fontSize: "0.75rem" }}
-                                                    defaultValue=""
-                                                >
-                                                    <option value="">+ Otorgar</option>
-                                                    {POKEMON_LOCAL.filter(
-                                                        (pk) => !p.captures.some((c) => c.pokemonId === pk.id)
-                                                    ).map((pk) => (
-                                                        <option key={pk.id} value={pk.id}>
-                                                            {pk.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <div style={{ display: "flex", gap: "4px", flexDirection: "column" }}>
+                                                    <select
+                                                        onChange={(e) => {
+                                                            const pokemonId = parseInt(e.target.value);
+                                                            if (pokemonId) handleGrant(p.email, pokemonId);
+                                                            e.target.value = "";
+                                                        }}
+                                                        className="input-field"
+                                                        style={{ padding: "4px 8px", fontSize: "0.75rem" }}
+                                                        defaultValue=""
+                                                    >
+                                                        <option value="">+ Otorgar</option>
+                                                        {POKEMON_LOCAL.filter(
+                                                            (pk) => !p.captures.some((c) => c.pokemonId === pk.id)
+                                                        ).map((pk) => (
+                                                            <option key={pk.id} value={pk.id}>
+                                                                {pk.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        className="btn btn-small btn-danger"
+                                                        style={{ fontSize: "0.65rem", padding: "4px 8px" }}
+                                                        onClick={() => handleDeleteParticipant(p.id, p.nick)}
+                                                    >
+                                                        🗑️ Eliminar
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
