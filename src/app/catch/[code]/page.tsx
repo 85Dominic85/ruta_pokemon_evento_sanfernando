@@ -11,6 +11,17 @@ interface PokemonInfo {
     flavorText: string;
 }
 
+function PokeballCapture() {
+    return (
+        <div className="pokeball-drop-wrapper">
+            <div className="pokeball-body pokeball-captured">
+                <div className="pokeball-band" />
+                <div className="pokeball-button" />
+            </div>
+        </div>
+    );
+}
+
 function ConfettiEffect() {
     const colors = ["#FFCB05", "#FF0000", "#3B4CCA", "#4ade80", "#fff"];
     return (
@@ -58,6 +69,8 @@ export default function CatchPage({ params }: { params: Promise<{ code: string }
         setStatus("capturing");
         setError("");
 
+        const animationStart = Date.now();
+
         try {
             const res = await fetch("/api/catch", {
                 method: "POST",
@@ -75,6 +88,11 @@ export default function CatchPage({ params }: { params: Promise<{ code: string }
 
             setPokemon(data.pokemon);
             setProgress(data.progress);
+
+            // Ensure minimum animation time so the Pokéball sequence completes
+            const elapsed = Date.now() - animationStart;
+            const minDelay = Math.max(0, 2800 - elapsed);
+            await new Promise((resolve) => setTimeout(resolve, minDelay));
 
             if (data.alreadyCaptured) {
                 setStatus("already");
@@ -110,8 +128,8 @@ export default function CatchPage({ params }: { params: Promise<{ code: string }
             <div className="page-content" style={{ justifyContent: "center", minHeight: "80dvh" }}>
                 {status === "capturing" && (
                     <div style={{ textAlign: "center" }} className="animate-fade-in">
-                        <div style={{ fontSize: "4rem", marginBottom: "var(--space-lg)" }}>
-                            <span style={{ display: "inline-block", animation: "pokeball-spin 1s linear infinite" }}>⚪</span>
+                        <div style={{ marginBottom: "var(--space-xl)" }}>
+                            <PokeballCapture />
                         </div>
                         <h2 className="page-title">Capturando…</h2>
                         <p className="page-subtitle">La Pokéball se agita…</p>

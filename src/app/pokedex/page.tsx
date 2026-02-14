@@ -151,55 +151,74 @@ export default function PokedexPage() {
                         onClick={() => setSelectedPokemon(null)}
                     >
                         <div
-                            className="pokemon-card animate-bounce-in"
-                            style={{ maxWidth: "380px", width: "100%", maxHeight: "90dvh", overflowY: "auto" }}
+                            className="animate-bounce-in"
+                            style={{
+                                maxWidth: "380px",
+                                width: "100%",
+                                maxHeight: "90dvh",
+                                display: "flex",
+                                flexDirection: "column",
+                            }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Card image - clickable to fullscreen */}
+                            {/* Scrollable content */}
                             <div
+                                className="pokemon-card"
                                 style={{
-                                    width: "260px",
-                                    maxWidth: "100%",
-                                    margin: "0 auto var(--space-md)",
-                                    cursor: "pointer",
-                                    position: "relative",
+                                    flex: "1 1 auto",
+                                    overflowY: "auto",
+                                    minHeight: 0,
+                                    borderBottomLeftRadius: 0,
+                                    borderBottomRightRadius: 0,
+                                    borderBottom: "none",
                                 }}
-                                onClick={() => setFullscreenImage(true)}
                             >
-                                <img
-                                    src={selectedPokemon.imagePath}
-                                    alt={selectedPokemon.name}
+                                <div
                                     style={{
-                                        width: "100%",
-                                        height: "auto",
-                                        objectFit: "contain",
-                                        borderRadius: "var(--radius-md)",
+                                        width: "260px",
+                                        maxWidth: "100%",
+                                        margin: "0 auto var(--space-md)",
+                                        cursor: "pointer",
+                                        position: "relative",
                                     }}
-                                />
-                                <div style={{
-                                    position: "absolute",
-                                    bottom: "var(--space-sm)",
-                                    right: "var(--space-sm)",
-                                    background: "rgba(0,0,0,0.7)",
-                                    color: "white",
-                                    padding: "4px 8px",
-                                    borderRadius: "var(--radius-sm)",
-                                    fontSize: "0.65rem",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                }}>
-                                    🔍 Ampliar
+                                    onClick={() => setFullscreenImage(true)}
+                                >
+                                    <img
+                                        src={selectedPokemon.imagePath}
+                                        alt={selectedPokemon.name}
+                                        style={{
+                                            width: "100%",
+                                            height: "auto",
+                                            objectFit: "contain",
+                                            borderRadius: "var(--radius-md)",
+                                        }}
+                                    />
+                                    <div style={{
+                                        position: "absolute",
+                                        bottom: "var(--space-sm)",
+                                        right: "var(--space-sm)",
+                                        background: "rgba(0,0,0,0.7)",
+                                        color: "white",
+                                        padding: "4px 8px",
+                                        borderRadius: "var(--radius-sm)",
+                                        fontSize: "0.65rem",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                    }}>
+                                        🔍 Ampliar
+                                    </div>
                                 </div>
+
+                                <p style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+                                    #{String(selectedPokemon.id).padStart(3, "0")}
+                                </p>
+                                <h3 className="pokemon-name">{selectedPokemon.name}</h3>
+                                <p className="pokemon-flavor">{selectedPokemon.flavorText}</p>
                             </div>
 
-                            <p style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
-                                #{String(selectedPokemon.id).padStart(3, "0")}
-                            </p>
-                            <h3 className="pokemon-name">{selectedPokemon.name}</h3>
-                            <p className="pokemon-flavor">{selectedPokemon.flavorText}</p>
-
-                            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", justifyContent: "center" }}>
+                            {/* Fixed button bar - always visible */}
+                            <div className="modal-button-bar">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setFullscreenImage(true); }}
                                     className="btn btn-primary btn-small"
@@ -225,11 +244,11 @@ export default function PokedexPage() {
                             inset: 0,
                             background: "rgba(0, 0, 0, 0.95)",
                             display: "flex",
-                            flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
                             zIndex: 200,
                             padding: "var(--space-md)",
+                            paddingBottom: "calc(var(--space-md) + 60px)",
                         }}
                         onClick={() => setFullscreenImage(false)}
                     >
@@ -238,7 +257,7 @@ export default function PokedexPage() {
                             alt={selectedPokemon.name}
                             style={{
                                 maxWidth: "95vw",
-                                maxHeight: "85dvh",
+                                maxHeight: "calc(85dvh - 60px)",
                                 objectFit: "contain",
                                 borderRadius: "var(--radius-md)",
                             }}
@@ -246,7 +265,14 @@ export default function PokedexPage() {
                         <button
                             onClick={(e) => { e.stopPropagation(); setFullscreenImage(false); }}
                             className="btn btn-secondary btn-small"
-                            style={{ marginTop: "var(--space-md)" }}
+                            style={{
+                                position: "absolute",
+                                bottom: "var(--space-lg)",
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                minHeight: "44px",
+                                minWidth: "120px",
+                            }}
                         >
                             Volver
                         </button>
