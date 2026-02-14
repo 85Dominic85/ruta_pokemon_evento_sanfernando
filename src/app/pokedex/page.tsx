@@ -99,10 +99,10 @@ export default function PokedexPage() {
                         >
                             <div style={{
                                 width: "120px",
+                                height: "140px",
                                 margin: "0 auto var(--space-sm)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
+                                overflow: "hidden",
+                                borderRadius: "var(--radius-sm)",
                             }}>
                                 <img
                                     src={pokemon.imagePath}
@@ -110,8 +110,8 @@ export default function PokedexPage() {
                                     style={{
                                         width: "100%",
                                         height: "auto",
-                                        objectFit: "contain",
-                                        borderRadius: "var(--radius-sm)",
+                                        objectFit: "cover",
+                                        objectPosition: "top",
                                     }}
                                     className={pokemon.captured ? "" : "pokemon-silhouette"}
                                 />
@@ -152,13 +152,19 @@ export default function PokedexPage() {
                     >
                         <div
                             className="pokemon-card animate-bounce-in"
-                            style={{ maxWidth: "360px", width: "100%" }}
+                            style={{ maxWidth: "380px", width: "100%", maxHeight: "90dvh", overflowY: "auto" }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="pokemon-image-container">
+                            <div style={{ width: "300px", maxWidth: "100%", margin: "0 auto var(--space-lg)" }}>
                                 <img
                                     src={selectedPokemon.imagePath}
                                     alt={selectedPokemon.name}
+                                    style={{
+                                        width: "100%",
+                                        height: "auto",
+                                        objectFit: "contain",
+                                        borderRadius: "var(--radius-md)",
+                                    }}
                                 />
                             </div>
                             <p style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
@@ -167,9 +173,9 @@ export default function PokedexPage() {
                             <h3 className="pokemon-name">{selectedPokemon.name}</h3>
                             <p className="pokemon-flavor">{selectedPokemon.flavorText}</p>
                             <button
-                                onClick={() => setSelectedPokemon(null)}
+                                onClick={(e) => { e.stopPropagation(); setSelectedPokemon(null); }}
                                 className="btn btn-secondary btn-small"
-                                style={{ marginTop: "var(--space-lg)" }}
+                                style={{ marginTop: "var(--space-lg)", position: "relative", zIndex: 10 }}
                             >
                                 Cerrar
                             </button>

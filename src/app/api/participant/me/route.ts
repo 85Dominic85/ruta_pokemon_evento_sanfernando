@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeEmail } from "@/lib/emailAllowlist";
-import { POKEMON_LOCAL } from "@/lib/pokemon";
 
 export async function GET(request: NextRequest) {
     try {
@@ -42,8 +41,14 @@ export async function GET(request: NextRequest) {
         const capturedIds = participant.captures.map((c) => c.pokemonId);
         const progress = capturedIds.length;
 
-        const pokedex = POKEMON_LOCAL.map((p) => ({
-            ...p,
+        // Leer Pokémon desde BD para tener datos actualizados (flavorText, imagePath, etc.)
+        const allPokemon = await prisma.pokemonLocal.findMany({ orderBy: { id: "asc" } });
+        const pokedex = allPokemon.map((p) => ({
+            id: p.id,
+            name: p.name,
+            imagePath: p.imagePath,
+            flavorText: p.flavorText,
+            stopId: p.stopId,
             captured: capturedIds.includes(p.id),
         }));
 
