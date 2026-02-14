@@ -566,6 +566,20 @@ body {
   }
 }
 
+/* === MAP MARKER PULSE === */
+.map-marker-pulse {
+  animation: map-marker-pulse 2s ease-in-out infinite;
+}
+
+@keyframes map-marker-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 203, 5, 0);
+  }
+}
+
 /* === REDUCED MOTION === */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

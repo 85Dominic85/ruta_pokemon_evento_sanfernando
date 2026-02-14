@@ -170,11 +170,135 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
     );
 }
 
+function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: typeof STOPS; capturedPokemonIds: number[]; size?: "small" | "large" }) {
+    const markerSize = size === "large" ? 34 : 26;
+    const fontSize = size === "large" ? "11px" : "9px";
+    const labelSize = size === "large" ? "8px" : "6px";
+    const labelNameSize = size === "large" ? "7px" : "5px";
+
+    return (
+        <>
+            {stops.map((stop) => {
+                const pokemon = POKEMON_LOCAL.find((p) => p.stopId === stop.id);
+                const isCaptured = pokemon && capturedPokemonIds.includes(pokemon.id);
+                const isNext = !isCaptured;
+                return (
+                    <div
+                        key={stop.id}
+                        style={{
+                            position: "absolute",
+                            left: `${stop.mapX}%`,
+                            top: `${stop.mapY}%`,
+                            transform: "translate(-50%, -50%)",
+                            pointerEvents: "none",
+                            zIndex: 10,
+                        }}
+                    >
+                        <div
+                            className={isNext ? "map-marker-pulse" : ""}
+                            style={{
+                                width: `${markerSize}px`, height: `${markerSize}px`,
+                                borderRadius: "50%",
+                                background: isCaptured ? "rgba(255,203,5,0.9)" : "rgba(60,60,90,0.85)",
+                                border: `3px solid ${isCaptured ? "#C7A008" : "#5a5a7a"}`,
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                boxShadow: isCaptured ? "0 0 10px rgba(255,203,5,0.5)" : "0 2px 6px rgba(0,0,0,0.5)",
+                                fontSize, fontWeight: "bold",
+                                color: isCaptured ? "#1a1a2e" : "#ccc",
+                                fontFamily: "'Press Start 2P', monospace",
+                            }}
+                        >
+                            {isCaptured ? stop.order : "?"}
+                        </div>
+                        {/* Label */}
+                        <div style={{
+                            position: "absolute",
+                            top: "100%", left: "50%",
+                            transform: "translateX(-50%)",
+                            whiteSpace: "nowrap",
+                            fontSize: labelSize, fontWeight: 600,
+                            color: isCaptured ? "#FFCB05" : "#6a6a8a",
+                            textShadow: "0 1px 3px rgba(0,0,0,0.9)",
+                            marginTop: "2px",
+                            textAlign: "center",
+                        }}>
+                            {isCaptured
+                                ? (stop.name.length > 22 ? stop.name.slice(0, 19) + "..." : stop.name)
+                                : "Encuentra el QR"
+                            }
+                            {isCaptured && pokemon && (
+                                <div style={{ color: "#4ade80", fontSize: labelNameSize, fontFamily: "'Press Start 2P'" }}>
+                                    {pokemon.name}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
+        </>
+    );
+}
+
+function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => void; stops: typeof STOPS; capturedPokemonIds: number[] }) {
+    return (
+        <div
+            style={{
+                position: "fixed", inset: 0,
+                background: "rgba(0,0,0,0.95)",
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+                zIndex: 200, padding: "var(--space-sm)",
+            }}
+            onClick={onClose}
+        >
+            <div
+                style={{
+                    position: "relative",
+                    maxWidth: "100vw", maxHeight: "85dvh",
+                    overflow: "auto",
+                    touchAction: "pinch-zoom",
+                    borderRadius: "var(--radius-lg)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <img
+                    src="/images/mapa-ruta-opt.png"
+                    alt="Mapa de la Ruta Pokémon"
+                    style={{
+                        width: "max(100vw, 600px)", height: "auto",
+                        display: "block", imageRendering: "pixelated",
+                    }}
+                />
+                <MapMarkers stops={stops} capturedPokemonIds={capturedPokemonIds} size="large" />
+            </div>
+
+            <p style={{
+                color: "rgba(255,255,255,0.5)", fontSize: "0.65rem",
+                marginTop: "var(--space-sm)", textAlign: "center",
+            }}>
+                Desliza para explorar
+            </p>
+
+            <button
+                onClick={onClose}
+                className="btn btn-secondary btn-small"
+                style={{
+                    marginTop: "var(--space-sm)",
+                    minHeight: "44px", minWidth: "120px",
+                }}
+            >
+                Cerrar
+            </button>
+        </div>
+    );
+}
+
 export default function MapPage() {
     const router = useRouter();
     const [captures, setCaptures] = useState<CaptureData[]>([]);
     const [loading, setLoading] = useState(true);
     const [showScanner, setShowScanner] = useState(false);
+    const [showFullMap, setShowFullMap] = useState(false);
 
     useEffect(() => {
         const email = localStorage.getItem("pokemon_email");
@@ -198,7 +322,6 @@ export default function MapPage() {
     const capturedPokemonIds = captures.map((c) => c.pokemonId);
 
     // Calculate which stops are visible
-    // A stop is visible if: captured, or it's the next one after the last captured
     const capturedOrders = STOPS.filter((stop) => {
         const pokemon = POKEMON_LOCAL.find((p) => p.stopId === stop.id);
         return pokemon && capturedPokemonIds.includes(pokemon.id);
@@ -220,8 +343,8 @@ export default function MapPage() {
             <div className="page-content">
                 {/* Header */}
                 <div style={{ textAlign: "center" }}>
-                    <h1 className="page-title">🗺️ Mapa de Ruta</h1>
-                    <p className="page-subtitle">San Fernando, Cádiz</p>
+                    <h1 className="page-title">Mapa de Ruta</h1>
+                    <p className="page-subtitle">San Fernando, Cadiz</p>
                 </div>
 
                 {/* Progress */}
@@ -235,143 +358,32 @@ export default function MapPage() {
                     <span className="progress-text">{progress}/5</span>
                 </div>
 
-                {/* SVG Map */}
-                <div className="card" style={{ padding: "var(--space-md)", overflow: "hidden" }}>
-                    <svg
-                        viewBox="0 0 400 500"
-                        width="100%"
-                        height="auto"
-                        style={{ display: "block" }}
-                    >
-                        {/* Background */}
-                        <defs>
-                            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#0f3460" />
-                                <stop offset="100%" stopColor="#1a1a2e" />
-                            </linearGradient>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
+                {/* Pixel Art Map */}
+                <div
+                    style={{
+                        position: "relative", width: "100%",
+                        borderRadius: "var(--radius-lg)", overflow: "hidden",
+                        cursor: "pointer",
+                        border: "2px solid rgba(255,203,5,0.3)",
+                    }}
+                    onClick={() => setShowFullMap(true)}
+                >
+                    <img
+                        src="/images/mapa-ruta-opt.png"
+                        alt="Mapa de la Ruta Pokemon"
+                        style={{ width: "100%", height: "auto", display: "block", imageRendering: "pixelated" }}
+                    />
+                    <MapMarkers stops={visibleStops} capturedPokemonIds={capturedPokemonIds} size="small" />
 
-                        <rect width="400" height="500" rx="12" fill="url(#bgGrad)" />
-
-                        {/* Grid lines */}
-                        {[100, 200, 300, 400].map((y) => (
-                            <line key={`h${y}`} x1="0" y1={y} x2="400" y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                        ))}
-                        {[100, 200, 300].map((x) => (
-                            <line key={`v${x}`} x1={x} y1="0" x2={x} y2="500" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                        ))}
-
-                        {/* Route path - only between visible stops */}
-                        {visibleStops.length >= 2 && (
-                            <path
-                                d={visibleStops.reduce((d, stop, i) => {
-                                    const x = stop.mapX * 4;
-                                    const y = stop.mapY * 5;
-                                    if (i === 0) return `M ${x} ${y}`;
-                                    const prev = visibleStops[i - 1];
-                                    const px = prev.mapX * 4;
-                                    const py = prev.mapY * 5;
-                                    return `${d} C ${px + 40} ${py + 30}, ${x - 40} ${y - 30}, ${x} ${y}`;
-                                }, "")}
-                                fill="none"
-                                stroke="rgba(255, 203, 5, 0.3)"
-                                strokeWidth="3"
-                                strokeDasharray="8 6"
-                            />
-                        )}
-
-                        {/* Stop markers - only visible stops */}
-                        {visibleStops.map((stop) => {
-                            const pokemon = POKEMON_LOCAL.find((p) => p.stopId === stop.id);
-                            const isCaptured = pokemon && capturedPokemonIds.includes(pokemon.id);
-                            const cx = stop.mapX * 4;
-                            const cy = stop.mapY * 5;
-
-                            return (
-                                <g key={stop.id}>
-                                    {/* Glow ring for captured */}
-                                    {isCaptured && (
-                                        <circle
-                                            cx={cx}
-                                            cy={cy}
-                                            r="22"
-                                            fill="none"
-                                            stroke="var(--color-primary)"
-                                            strokeWidth="2"
-                                            opacity="0.4"
-                                            filter="url(#glow)"
-                                        />
-                                    )}
-
-                                    {/* Pin circle */}
-                                    <circle
-                                        cx={cx}
-                                        cy={cy}
-                                        r="16"
-                                        fill={isCaptured ? "#FFCB05" : "#3a3a5a"}
-                                        stroke={isCaptured ? "#C7A008" : "#5a5a7a"}
-                                        strokeWidth="3"
-                                    />
-
-                                    {/* Stop number or ? */}
-                                    <text
-                                        x={cx}
-                                        y={cy + 1}
-                                        textAnchor="middle"
-                                        dominantBaseline="central"
-                                        fill={isCaptured ? "#1a1a2e" : "#8a8aaa"}
-                                        fontSize="12"
-                                        fontWeight="bold"
-                                        fontFamily="'Press Start 2P', monospace"
-                                    >
-                                        {isCaptured ? stop.order : "?"}
-                                    </text>
-
-                                    {/* Label */}
-                                    <text
-                                        x={cx}
-                                        y={cy + 30}
-                                        textAnchor="middle"
-                                        fill={isCaptured ? "#FFCB05" : "#6a6a8a"}
-                                        fontSize="7"
-                                        fontFamily="Inter, sans-serif"
-                                        fontWeight="600"
-                                    >
-                                        {isCaptured
-                                            ? (stop.name.length > 25 ? stop.name.slice(0, 22) + "…" : stop.name)
-                                            : "❓ Encuentra el QR"
-                                        }
-                                    </text>
-
-                                    {/* Pokémon name if captured */}
-                                    {isCaptured && pokemon && (
-                                        <text
-                                            x={cx}
-                                            y={cy + 40}
-                                            textAnchor="middle"
-                                            fill="#4ade80"
-                                            fontSize="6"
-                                            fontFamily="'Press Start 2P', monospace"
-                                        >
-                                            ✓ {pokemon.name}
-                                        </text>
-                                    )}
-                                </g>
-                            );
-                        })}
-
-                        {/* Title */}
-                        <text x="200" y="480" textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="8" fontFamily="'Press Start 2P', monospace">
-                            San Fernando · Ruta Pokémon
-                        </text>
-                    </svg>
+                    {/* Hint overlay */}
+                    <div style={{
+                        position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)",
+                        background: "rgba(0,0,0,0.65)", borderRadius: "var(--radius-sm)",
+                        padding: "3px 10px", fontSize: "0.6rem", color: "rgba(255,255,255,0.8)",
+                        whiteSpace: "nowrap", pointerEvents: "none",
+                    }}>
+                        Toca para ampliar
+                    </div>
                 </div>
 
                 {/* Capture button */}
@@ -385,23 +397,32 @@ export default function MapPage() {
                         padding: "var(--space-md) var(--space-xl)",
                     }}
                 >
-                    📷 Escanear QR
+                    Escanear QR
                 </button>
 
                 {/* Navigation */}
                 <div className="nav-bar">
-                    <Link href="/pokedex" className="nav-link">📖 Pokédex</Link>
-                    <Link href="/finish" className="nav-link">🏆 Finalizar</Link>
+                    <Link href="/pokedex" className="nav-link">Pokedex</Link>
+                    <Link href="/finish" className="nav-link">Finalizar</Link>
                 </div>
 
                 {progress === 5 && (
                     <div className="animate-fade-in" style={{ textAlign: "center" }}>
                         <Link href="/finish" className="btn btn-secondary" style={{ width: "100%" }}>
-                            🎉 ¡Ruta Completa! Ver premio
+                            Ruta Completa! Ver premio
                         </Link>
                     </div>
                 )}
             </div>
+
+            {/* Full Map Modal */}
+            {showFullMap && (
+                <FullMapModal
+                    onClose={() => setShowFullMap(false)}
+                    stops={visibleStops}
+                    capturedPokemonIds={capturedPokemonIds}
+                />
+            )}
 
             {/* QR Scanner Modal */}
             {showScanner && <QRScannerModal onClose={() => setShowScanner(false)} />}
