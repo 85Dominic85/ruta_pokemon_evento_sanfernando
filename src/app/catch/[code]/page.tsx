@@ -130,8 +130,6 @@ export default function CatchPage({ params }: { params: Promise<{ code: string }
                                 <img
                                     src={pokemon.imagePath}
                                     alt={pokemon.name}
-                                    width={180}
-                                    height={180}
                                 />
                             </div>
                             <h3 className="pokemon-name">{pokemon.name}</h3>
@@ -170,8 +168,6 @@ export default function CatchPage({ params }: { params: Promise<{ code: string }
                                 <img
                                     src={pokemon.imagePath}
                                     alt={pokemon.name}
-                                    width={180}
-                                    height={180}
                                 />
                             </div>
                             <h3 className="pokemon-name">{pokemon.name}</h3>

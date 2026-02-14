@@ -98,8 +98,7 @@ export default function PokedexPage() {
                             onClick={() => pokemon.captured && setSelectedPokemon(pokemon)}
                         >
                             <div style={{
-                                width: "80px",
-                                height: "80px",
+                                width: "120px",
                                 margin: "0 auto var(--space-sm)",
                                 display: "flex",
                                 alignItems: "center",
@@ -108,11 +107,11 @@ export default function PokedexPage() {
                                 <img
                                     src={pokemon.imagePath}
                                     alt={pokemon.captured ? pokemon.name : "???"}
-                                    width={80}
-                                    height={80}
                                     style={{
+                                        width: "100%",
+                                        height: "auto",
                                         objectFit: "contain",
-                                        imageRendering: "pixelated",
+                                        borderRadius: "var(--radius-sm)",
                                     }}
                                     className={pokemon.captured ? "" : "pokemon-silhouette"}
                                 />
@@ -160,8 +159,6 @@ export default function PokedexPage() {
                                 <img
                                     src={selectedPokemon.imagePath}
                                     alt={selectedPokemon.name}
-                                    width={180}
-                                    height={180}
                                 />
                             </div>
                             <p style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
