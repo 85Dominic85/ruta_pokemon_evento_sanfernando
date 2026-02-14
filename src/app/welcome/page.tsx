@@ -62,7 +62,13 @@ function WelcomeForm() {
             <div className="page-content">
                 {/* Header */}
                 <div className="animate-fade-in" style={{ textAlign: "center", marginTop: "var(--space-xl)" }}>
-                    <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>🎮</div>
+                    <div style={{ marginBottom: "var(--space-md)" }}>
+                        <img
+                            src="/images/organizador.png"
+                            alt="Organizador"
+                            style={{ width: "120px", height: "120px", objectFit: "contain", imageRendering: "pixelated" }}
+                        />
+                    </div>
                     <h1 className="page-title">Ruta Pokémon<br />San Fernando</h1>
                     <p className="page-subtitle" style={{ marginTop: "var(--space-sm)" }}>
                         30 Aniversario — ¡Captura los 5 Pokémon locales!
