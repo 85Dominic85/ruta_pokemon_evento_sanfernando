@@ -66,7 +66,7 @@ function WelcomeForm() {
                         <img
                             src="/images/organizador.png"
                             alt="Organizador"
-                            style={{ width: "120px", height: "120px", objectFit: "contain", imageRendering: "pixelated" }}
+                            style={{ width: "180px", height: "180px", objectFit: "contain", imageRendering: "pixelated" }}
                         />
                     </div>
                     <h1 className="page-title">Ruta Pokémon<br />San Fernando</h1>
