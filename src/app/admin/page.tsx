@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { POKEMON_LOCAL } from "@/lib/pokemon";
 
 interface Participant {
@@ -23,6 +24,9 @@ interface Metrics {
 type Tab = "metrics" | "participants" | "stops" | "verify";
 
 export default function AdminPage() {
+    const router = useRouter();
+    const [authenticated, setAuthenticated] = useState(false);
+    const [checking, setChecking] = useState(true);
     const [tab, setTab] = useState<Tab>("metrics");
     const [metrics, setMetrics] = useState<Metrics | null>(null);
     const [participants, setParticipants] = useState<Participant[]>([]);
@@ -34,15 +38,45 @@ export default function AdminPage() {
     const [verifyCode, setVerifyCode] = useState("");
     const [verifyResult, setVerifyResult] = useState<string>("");
 
+    // Auth guard: verify cookie on mount
+    useEffect(() => {
+        async function checkAuth() {
+            try {
+                const res = await fetch("/api/admin/metrics", { credentials: "include" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.ok) {
+                        setAuthenticated(true);
+                        setMetrics(data.metrics);
+                    } else {
+                        router.push("/admin/login");
+                    }
+                } else {
+                    router.push("/admin/login");
+                }
+            } catch {
+                router.push("/admin/login");
+            } finally {
+                setChecking(false);
+            }
+        }
+        checkAuth();
+    }, [router]);
+
+    const handleLogout = async () => {
+        await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
+        router.push("/admin/login");
+    };
+
     const fetchMetrics = useCallback(async () => {
-        const res = await fetch("/api/admin/metrics");
+        const res = await fetch("/api/admin/metrics", { credentials: "include" });
         const data = await res.json();
         if (data.ok) setMetrics(data.metrics);
     }, []);
 
     const fetchParticipants = useCallback(async (q: string, p: number) => {
         setLoading(true);
-        const res = await fetch(`/api/admin/participants?query=${encodeURIComponent(q)}&page=${p}`);
+        const res = await fetch(`/api/admin/participants?query=${encodeURIComponent(q)}&page=${p}`, { credentials: "include" });
         const data = await res.json();
         if (data.ok) {
             setParticipants(data.participants);
@@ -52,20 +86,21 @@ export default function AdminPage() {
     }, []);
 
     useEffect(() => {
-        fetchMetrics();
-    }, [fetchMetrics]);
+        if (authenticated) fetchMetrics();
+    }, [authenticated, fetchMetrics]);
 
     useEffect(() => {
-        if (tab === "participants") {
+        if (authenticated && tab === "participants") {
             fetchParticipants(search, page);
         }
-    }, [tab, search, page, fetchParticipants]);
+    }, [authenticated, tab, search, page, fetchParticipants]);
 
     const handleGrant = async (email: string, pokemonId: number) => {
         const res = await fetch("/api/admin/grant-capture", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, pokemonId }),
+            credentials: "include",
         });
         const data = await res.json();
         setMessage(data.message || data.error || "Hecho");
@@ -80,6 +115,7 @@ export default function AdminPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, pokemonId }),
+            credentials: "include",
         });
         const data = await res.json();
         setMessage(data.message || data.error || "Hecho");
@@ -93,6 +129,7 @@ export default function AdminPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ finishCode: verifyCode }),
+            credentials: "include",
         });
         const data = await res.json();
         if (data.ok) {
@@ -102,6 +139,42 @@ export default function AdminPage() {
         }
     };
 
+    const handleDownloadCSV = async (endpoint: string, filename: string) => {
+        try {
+            const res = await fetch(endpoint, { credentials: "include" });
+            if (!res.ok) {
+                setMessage("Error al descargar CSV");
+                setTimeout(() => setMessage(""), 3000);
+                return;
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            setMessage("Error al descargar CSV");
+            setTimeout(() => setMessage(""), 3000);
+        }
+    };
+
+    if (checking) {
+        return (
+            <div className="page-container" style={{ justifyContent: "center", minHeight: "100dvh" }}>
+                <div style={{ textAlign: "center" }}>
+                    <div className="loading-spinner" />
+                    <p style={{ marginTop: "var(--space-md)", fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
+                        Verificando acceso...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!authenticated) return null;
+
     return (
         <div className="admin-container">
             {/* Header */}
@@ -109,13 +182,22 @@ export default function AdminPage() {
                 <h1 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.85rem", color: "var(--color-primary)" }}>
                     ⚙️ Admin Panel
                 </h1>
-                <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                    <a href="/api/admin/export/participants.csv" className="btn btn-small btn-secondary">
+                <div style={{ display: "flex", gap: "var(--space-sm)", flexWrap: "wrap" }}>
+                    <button
+                        className="btn btn-small btn-secondary"
+                        onClick={() => handleDownloadCSV("/api/admin/export/participants.csv", "participantes.csv")}
+                    >
                         📥 CSV Participantes
-                    </a>
-                    <a href="/api/admin/export/completions.csv" className="btn btn-small btn-secondary">
+                    </button>
+                    <button
+                        className="btn btn-small btn-secondary"
+                        onClick={() => handleDownloadCSV("/api/admin/export/completions.csv", "completados.csv")}
+                    >
                         📥 CSV Completados
-                    </a>
+                    </button>
+                    <button className="btn btn-small btn-danger" onClick={handleLogout}>
+                        🚪 Salir
+                    </button>
                 </div>
             </div>
 
@@ -350,6 +432,7 @@ function StopsManager() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ stopId, active }),
+            credentials: "include",
         });
         setStops((prev) =>
             prev.map((s) => (s.id === stopId ? { ...s, active } : s))
