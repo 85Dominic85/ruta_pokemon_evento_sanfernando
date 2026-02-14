@@ -9,6 +9,7 @@ interface PokedexEntry {
     id: number;
     name: string;
     imagePath: string;
+    thumbPath: string;
     flavorText: string;
     captured: boolean;
 }
@@ -18,6 +19,7 @@ export default function PokedexPage() {
     const [pokedex, setPokedex] = useState<PokedexEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPokemon, setSelectedPokemon] = useState<PokedexEntry | null>(null);
+    const [fullscreenImage, setFullscreenImage] = useState(false);
 
     useEffect(() => {
         const email = localStorage.getItem("pokemon_email");
@@ -32,7 +34,6 @@ export default function PokedexPage() {
                 if (data.ok && data.pokedex) {
                     setPokedex(data.pokedex);
                 } else {
-                    // Fallback: show all as uncaptured
                     setPokedex(
                         POKEMON_LOCAL.map((p) => ({
                             ...p,
@@ -88,7 +89,7 @@ export default function PokedexPage() {
                             key={pokemon.id}
                             className={`card animate-fade-in stagger-${index + 1}`}
                             style={{
-                                padding: "var(--space-md)",
+                                padding: "var(--space-sm)",
                                 textAlign: "center",
                                 cursor: pokemon.captured ? "pointer" : "default",
                                 border: pokemon.captured ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
@@ -98,20 +99,19 @@ export default function PokedexPage() {
                             onClick={() => pokemon.captured && setSelectedPokemon(pokemon)}
                         >
                             <div style={{
-                                width: "120px",
-                                height: "140px",
-                                margin: "0 auto var(--space-sm)",
+                                width: "100%",
+                                aspectRatio: "2 / 1",
                                 overflow: "hidden",
                                 borderRadius: "var(--radius-sm)",
+                                marginBottom: "var(--space-sm)",
                             }}>
                                 <img
-                                    src={pokemon.imagePath}
+                                    src={pokemon.thumbPath}
                                     alt={pokemon.captured ? pokemon.name : "???"}
                                     style={{
                                         width: "100%",
-                                        height: "auto",
+                                        height: "100%",
                                         objectFit: "cover",
-                                        objectPosition: "top",
                                     }}
                                     className={pokemon.captured ? "" : "pokemon-silhouette"}
                                 />
@@ -135,17 +135,17 @@ export default function PokedexPage() {
                     ))}
                 </div>
 
-                {/* Detail Modal */}
-                {selectedPokemon && (
+                {/* Detail Modal - Card info + description */}
+                {selectedPokemon && !fullscreenImage && (
                     <div
                         style={{
                             position: "fixed",
                             inset: 0,
-                            background: "rgba(0, 0, 0, 0.8)",
+                            background: "rgba(0, 0, 0, 0.85)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            padding: "var(--space-lg)",
+                            padding: "var(--space-md)",
                             zIndex: 100,
                         }}
                         onClick={() => setSelectedPokemon(null)}
@@ -155,7 +155,17 @@ export default function PokedexPage() {
                             style={{ maxWidth: "380px", width: "100%", maxHeight: "90dvh", overflowY: "auto" }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div style={{ width: "300px", maxWidth: "100%", margin: "0 auto var(--space-lg)" }}>
+                            {/* Card image - clickable to fullscreen */}
+                            <div
+                                style={{
+                                    width: "260px",
+                                    maxWidth: "100%",
+                                    margin: "0 auto var(--space-md)",
+                                    cursor: "pointer",
+                                    position: "relative",
+                                }}
+                                onClick={() => setFullscreenImage(true)}
+                            >
                                 <img
                                     src={selectedPokemon.imagePath}
                                     alt={selectedPokemon.name}
@@ -166,20 +176,80 @@ export default function PokedexPage() {
                                         borderRadius: "var(--radius-md)",
                                     }}
                                 />
+                                <div style={{
+                                    position: "absolute",
+                                    bottom: "var(--space-sm)",
+                                    right: "var(--space-sm)",
+                                    background: "rgba(0,0,0,0.7)",
+                                    color: "white",
+                                    padding: "4px 8px",
+                                    borderRadius: "var(--radius-sm)",
+                                    fontSize: "0.65rem",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                }}>
+                                    🔍 Ampliar
+                                </div>
                             </div>
+
                             <p style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
                                 #{String(selectedPokemon.id).padStart(3, "0")}
                             </p>
                             <h3 className="pokemon-name">{selectedPokemon.name}</h3>
                             <p className="pokemon-flavor">{selectedPokemon.flavorText}</p>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setSelectedPokemon(null); }}
-                                className="btn btn-secondary btn-small"
-                                style={{ marginTop: "var(--space-lg)", position: "relative", zIndex: 10 }}
-                            >
-                                Cerrar
-                            </button>
+
+                            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", justifyContent: "center" }}>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setFullscreenImage(true); }}
+                                    className="btn btn-primary btn-small"
+                                >
+                                    🔍 Ver carta
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSelectedPokemon(null); }}
+                                    className="btn btn-secondary btn-small"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Fullscreen card viewer - maximum quality */}
+                {selectedPokemon && fullscreenImage && (
+                    <div
+                        style={{
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(0, 0, 0, 0.95)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 200,
+                            padding: "var(--space-md)",
+                        }}
+                        onClick={() => setFullscreenImage(false)}
+                    >
+                        <img
+                            src={selectedPokemon.imagePath}
+                            alt={selectedPokemon.name}
+                            style={{
+                                maxWidth: "95vw",
+                                maxHeight: "85dvh",
+                                objectFit: "contain",
+                                borderRadius: "var(--radius-md)",
+                            }}
+                        />
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setFullscreenImage(false); }}
+                            className="btn btn-secondary btn-small"
+                            style={{ marginTop: "var(--space-md)" }}
+                        >
+                            Volver
+                        </button>
                     </div>
                 )}
 

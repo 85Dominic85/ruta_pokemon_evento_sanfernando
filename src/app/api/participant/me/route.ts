@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
             id: p.id,
             name: p.name,
             imagePath: p.imagePath,
+            thumbPath: p.imagePath.replace(".png", "-thumb.png"),
             flavorText: p.flavorText,
             stopId: p.stopId,
             captured: capturedIds.includes(p.id),
