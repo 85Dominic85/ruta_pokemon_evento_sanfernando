@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="100%" stop-color="#FF4444"/>
+    </linearGradient>
+  </defs>
+  <!-- Tail curl -->
+  <path d="M 160 180 Q 200 200 190 150 Q 185 120 195 100" fill="none" stroke="#FF5555" stroke-width="8" stroke-linecap="round"/>
+  <!-- Body -->
+  <ellipse cx="120" cy="145" rx="55" ry="45" fill="url(#bg3)" stroke="#CC3333" stroke-width="3"/>
+  <!-- Belly stripe -->
+  <ellipse cx="120" cy="155" rx="35" ry="25" fill="#FFB3B3" opacity="0.5"/>
+  <!-- Eyes -->
+  <ellipse cx="100" cy="130" rx="12" ry="13" fill="white"/>
+  <ellipse cx="138" cy="130" rx="12" ry="13" fill="white"/>
+  <circle cx="103" cy="128" r="7" fill="#1a1a2e"/>
+  <circle cx="141" cy="128" r="7" fill="#1a1a2e"/>
+  <circle cx="105" cy="126" r="3" fill="white"/>
+  <circle cx="143" cy="126" r="3" fill="white"/>
+  <!-- Smile -->
+  <path d="M 105 150 Q 120 162 135 150" fill="none" stroke="#8B0000" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Claws -->
+  <ellipse cx="65" cy="140" rx="18" ry="12" fill="#FF5555" stroke="#CC3333" stroke-width="2"/>
+  <ellipse cx="175" cy="140" rx="18" ry="12" fill="#FF5555" stroke="#CC3333" stroke-width="2"/>
+  <!-- Claw pincers -->
+  <path d="M 50 135 L 42 128 M 50 145 L 42 152" stroke="#CC3333" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 190 135 L 198 128 M 190 145 L 198 152" stroke="#CC3333" stroke-width="3" stroke-linecap="round"/>
+  <!-- Antennae -->
+  <line x1="95" y1="105" x2="75" y2="70" stroke="#FF6B6B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="105" x2="160" y2="70" stroke="#FF6B6B" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="75" cy="70" r="4" fill="#FF8888"/>
+  <circle cx="160" cy="70" r="4" fill="#FF8888"/>
+  <!-- Legs -->
+  <rect x="95" y="185" width="10" height="15" rx="5" fill="#FF5555" stroke="#CC3333" stroke-width="1.5"/>
+  <rect x="115" y="188" width="10" height="15" rx="5" fill="#FF5555" stroke="#CC3333" stroke-width="1.5"/>
+  <rect x="135" y="185" width="10" height="15" rx="5" fill="#FF5555" stroke="#CC3333" stroke-width="1.5"/>
+  <!-- Water drops -->
+  <ellipse cx="55" cy="100" rx="4" ry="6" fill="#87CEEB" opacity="0.6"/>
+  <ellipse cx="185" cy="90" rx="3" ry="5" fill="#87CEEB" opacity="0.5"/>
+  <ellipse cx="45" cy="170" rx="3" ry="4" fill="#87CEEB" opacity="0.4"/>
+</svg>

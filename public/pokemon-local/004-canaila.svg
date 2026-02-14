@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8C42"/>
+      <stop offset="100%" stop-color="#E67E22"/>
+    </linearGradient>
+  </defs>
+  <!-- Tail -->
+  <path d="M 175 155 Q 210 140 220 120 Q 225 105 215 95" fill="none" stroke="#E67E22" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 215 95 L 225 85 M 215 95 L 225 100 M 215 95 L 220 108" stroke="#FF8C42" stroke-width="3" stroke-linecap="round"/>
+  <!-- Body -->
+  <ellipse cx="120" cy="145" rx="60" ry="50" fill="url(#bg4)" stroke="#D35400" stroke-width="3"/>
+  <!-- Belly -->
+  <ellipse cx="120" cy="155" rx="35" ry="28" fill="#FFDAB3" opacity="0.5"/>
+  <!-- Eyes (cheeky) -->
+  <ellipse cx="100" cy="128" rx="13" ry="14" fill="white"/>
+  <ellipse cx="142" cy="128" rx="13" ry="14" fill="white"/>
+  <circle cx="104" cy="126" r="7" fill="#2a1a0a"/>
+  <circle cx="146" cy="126" r="7" fill="#2a1a0a"/>
+  <circle cx="106" cy="124" r="3" fill="white"/>
+  <circle cx="148" cy="124" r="3" fill="white"/>
+  <!-- Cheeky grin -->
+  <path d="M 100 150 Q 120 168 140 150" fill="#8B4513" stroke="#6B3410" stroke-width="1.5"/>
+  <path d="M 100 150 Q 120 160 140 150" fill="none" stroke="#6B3410" stroke-width="1.5"/>
+  <!-- Tooth -->
+  <rect x="117" y="150" width="6" height="5" rx="1" fill="white"/>
+  <!-- Cap -->
+  <path d="M 70 110 Q 75 80 128 75 Q 175 80 175 108" fill="#3B4CCA" stroke="#2a3aa0" stroke-width="2"/>
+  <rect x="68" y="108" width="110" height="10" rx="5" fill="#3B4CCA" stroke="#2a3aa0" stroke-width="2"/>
+  <circle cx="128" cy="90" r="6" fill="white" opacity="0.8"/>
+  <!-- Paws -->
+  <ellipse cx="75" cy="185" rx="15" ry="10" fill="#E67E22" stroke="#D35400" stroke-width="2"/>
+  <ellipse cx="165" cy="185" rx="15" ry="10" fill="#E67E22" stroke="#D35400" stroke-width="2"/>
+  <!-- Cheeks -->
+  <circle cx="78" cy="145" r="8" fill="#FF6B35" opacity="0.4"/>
+  <circle cx="162" cy="145" r="8" fill="#FF6B35" opacity="0.4"/>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFE4A0"/>
+      <stop offset="100%" stop-color="#FFCB05"/>
+    </radialGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="128" cy="140" rx="70" ry="60" fill="url(#bg)" stroke="#C7A008" stroke-width="3"/>
+  <!-- Crispy dots -->
+  <circle cx="100" cy="130" r="4" fill="#E8B800" opacity="0.6"/>
+  <circle cx="140" cy="120" r="5" fill="#E8B800" opacity="0.5"/>
+  <circle cx="155" cy="145" r="3" fill="#E8B800" opacity="0.7"/>
+  <circle cx="110" cy="155" r="4" fill="#E8B800" opacity="0.5"/>
+  <!-- Eyes -->
+  <ellipse cx="108" cy="125" rx="12" ry="14" fill="white"/>
+  <ellipse cx="148" cy="125" rx="12" ry="14" fill="white"/>
+  <circle cx="111" cy="123" r="7" fill="#2a1a0a"/>
+  <circle cx="151" cy="123" r="7" fill="#2a1a0a"/>
+  <circle cx="113" cy="121" r="3" fill="white"/>
+  <circle cx="153" cy="121" r="3" fill="white"/>
+  <!-- Smile -->
+  <path d="M 110 148 Q 128 165 146 148" fill="none" stroke="#8B4513" stroke-width="3" stroke-linecap="round"/>
+  <!-- Antennae (shrimp-like) -->
+  <path d="M 100 90 Q 85 60 70 50" fill="none" stroke="#FF6B35" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 156 90 Q 171 60 186 50" fill="none" stroke="#FF6B35" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="70" cy="50" r="5" fill="#FF8C5A"/>
+  <circle cx="186" cy="50" r="5" fill="#FF8C5A"/>
+  <!-- Feet -->
+  <ellipse cx="100" cy="198" rx="18" ry="10" fill="#FFCB05" stroke="#C7A008" stroke-width="2"/>
+  <ellipse cx="156" cy="198" rx="18" ry="10" fill="#FFCB05" stroke="#C7A008" stroke-width="2"/>
+  <!-- Cheeks -->
+  <circle cx="85" cy="142" r="8" fill="#FFAAAA" opacity="0.5"/>
+  <circle cx="171" cy="142" r="8" fill="#FFAAAA" opacity="0.5"/>
+</svg>

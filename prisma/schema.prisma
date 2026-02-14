@@ -1,0 +1,60 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Participant {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  nick       String
+  consentAt  DateTime
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  captures   Capture[]
+  finish     Finish?
+}
+
+model Stop {
+  id       Int            @id
+  name     String
+  slug     String
+  order    Int
+  qrCode   String         @unique
+  active   Boolean        @default(true)
+  pokemon  PokemonLocal[]
+}
+
+model PokemonLocal {
+  id         Int       @id
+  name       String
+  imagePath  String
+  flavorText String
+  stop       Stop      @relation(fields: [stopId], references: [id])
+  stopId     Int
+  captures   Capture[]
+}
+
+model Capture {
+  id            String       @id @default(uuid())
+  participant   Participant  @relation(fields: [participantId], references: [id])
+  participantId String
+  pokemon       PokemonLocal @relation(fields: [pokemonId], references: [id])
+  pokemonId     Int
+  capturedAt    DateTime     @default(now())
+
+  @@unique([participantId, pokemonId])
+}
+
+model Finish {
+  id            String      @id @default(uuid())
+  participant   Participant @relation(fields: [participantId], references: [id])
+  participantId String      @unique
+  finishCode    String      @unique
+  issuedAt      DateTime    @default(now())
+  verifiedAt    DateTime?
+}

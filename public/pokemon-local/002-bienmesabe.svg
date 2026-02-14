@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFF8E7"/>
+      <stop offset="100%" stop-color="#F5DEB3"/>
+    </radialGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="128" cy="145" rx="65" ry="55" fill="url(#bg2)" stroke="#DEB887" stroke-width="3"/>
+  <!-- Sugar sparkles -->
+  <circle cx="90" cy="110" r="2" fill="white" opacity="0.8"/>
+  <circle cx="165" cy="115" r="2" fill="white" opacity="0.8"/>
+  <circle cx="130" cy="100" r="2.5" fill="white" opacity="0.7"/>
+  <circle cx="75" cy="140" r="1.5" fill="white" opacity="0.6"/>
+  <circle cx="180" cy="135" r="1.5" fill="white" opacity="0.6"/>
+  <!-- Eyes (dreamy) -->
+  <ellipse cx="108" cy="132" rx="13" ry="12" fill="white"/>
+  <ellipse cx="148" cy="132" rx="13" ry="12" fill="white"/>
+  <circle cx="110" cy="130" r="7" fill="#8B4513"/>
+  <circle cx="150" cy="130" r="7" fill="#8B4513"/>
+  <circle cx="112" cy="128" r="3" fill="white"/>
+  <circle cx="152" cy="128" r="3" fill="white"/>
+  <!-- Eyelashes (dreamy) -->
+  <path d="M 96 124 Q 100 120 104 124" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+  <path d="M 152 124 Q 156 120 160 124" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+  <!-- Smile -->
+  <path d="M 115 152 Q 128 162 141 152" fill="none" stroke="#A0522D" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Almond ears -->
+  <ellipse cx="75" cy="105" rx="15" ry="25" fill="#DEB887" stroke="#C4A882" stroke-width="2" transform="rotate(-20, 75, 105)"/>
+  <ellipse cx="181" cy="105" rx="15" ry="25" fill="#DEB887" stroke="#C4A882" stroke-width="2" transform="rotate(20, 181, 105)"/>
+  <ellipse cx="75" cy="105" rx="8" ry="15" fill="#FFF0D0" transform="rotate(-20, 75, 105)"/>
+  <ellipse cx="181" cy="105" rx="8" ry="15" fill="#FFF0D0" transform="rotate(20, 181, 105)"/>
+  <!-- Feet -->
+  <ellipse cx="105" cy="198" rx="16" ry="9" fill="#F5DEB3" stroke="#DEB887" stroke-width="2"/>
+  <ellipse cx="151" cy="198" rx="16" ry="9" fill="#F5DEB3" stroke="#DEB887" stroke-width="2"/>
+  <!-- Cheeks -->
+  <circle cx="88" cy="145" r="8" fill="#FFCCCC" opacity="0.4"/>
+  <circle cx="168" cy="145" r="8" fill="#FFCCCC" opacity="0.4"/>
+  <!-- Crown / sugar topping -->
+  <ellipse cx="128" cy="92" rx="30" ry="10" fill="#FFF8DC" stroke="#DEB887" stroke-width="1.5" opacity="0.8"/>
+</svg>
