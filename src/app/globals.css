@@ -256,22 +256,105 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  padding-top: 28px; /* room for the walking character */
 }
 
 .progress-bar {
   flex: 1;
-  height: 12px;
+  height: 14px;
   background: var(--color-bg);
-  border-radius: 6px;
-  overflow: hidden;
+  border-radius: 7px;
+  overflow: visible;
   border: 2px solid var(--color-border);
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), var(--color-success));
   transition: width 0.5s ease;
-  border-radius: 4px;
+  border-radius: 5px;
+  position: relative;
+}
+
+/* Walking trainer character */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  bottom: 4px;
+  width: 20px;
+  height: 28px;
+  image-rendering: pixelated;
+  animation: trainer-walk 0.5s steps(1) infinite;
+}
+
+/* Pixel-art trainer using box-shadow sprites */
+.progress-fill::after {
+  background: transparent;
+  box-shadow:
+    /* Frame: simple trainer profile - hat */
+    7px 0 0 0 #CC0000,
+    8px 0 0 0 #CC0000,
+    9px 0 0 0 #CC0000,
+    10px 0 0 0 #CC0000,
+    11px 0 0 0 #CC0000,
+    6px 2px 0 0 #CC0000,
+    7px 2px 0 0 #CC0000,
+    8px 2px 0 0 #CC0000,
+    9px 2px 0 0 #CC0000,
+    10px 2px 0 0 #CC0000,
+    11px 2px 0 0 #CC0000,
+    12px 2px 0 0 #CC0000,
+    /* Face */
+    8px 4px 0 0 #FFD9A0,
+    9px 4px 0 0 #FFD9A0,
+    10px 4px 0 0 #FFD9A0,
+    8px 6px 0 0 #FFD9A0,
+    9px 6px 0 0 #333,
+    10px 6px 0 0 #FFD9A0,
+    /* Body - jacket */
+    7px 8px 0 0 #3B4CCA,
+    8px 8px 0 0 #3B4CCA,
+    9px 8px 0 0 #3B4CCA,
+    10px 8px 0 0 #3B4CCA,
+    11px 8px 0 0 #3B4CCA,
+    7px 10px 0 0 #3B4CCA,
+    8px 10px 0 0 #3B4CCA,
+    9px 10px 0 0 #3B4CCA,
+    10px 10px 0 0 #3B4CCA,
+    11px 10px 0 0 #FFD9A0,
+    /* Arms */
+    6px 10px 0 0 #FFD9A0,
+    12px 8px 0 0 #FFD9A0,
+    /* Pants */
+    8px 12px 0 0 #1a1a2e,
+    9px 12px 0 0 #1a1a2e,
+    10px 12px 0 0 #1a1a2e,
+    /* Legs - walking frame 1 */
+    7px 14px 0 0 #1a1a2e,
+    8px 14px 0 0 #1a1a2e,
+    10px 14px 0 0 #1a1a2e,
+    11px 14px 0 0 #1a1a2e,
+    /* Shoes */
+    7px 16px 0 0 #CC0000,
+    11px 16px 0 0 #CC0000;
+  animation: trainer-walk 0.4s steps(1) infinite;
+}
+
+@keyframes trainer-walk {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(0px);
+  }
+  75% {
+    transform: translateY(-1px);
+  }
 }
 
 .progress-text {
