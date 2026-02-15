@@ -14,11 +14,14 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
     const router = useRouter();
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const html5ScannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
     const [error, setError] = useState("");
-    const [scanning, setScanning] = useState(true);
     const [lastScanned, setLastScanned] = useState("");
     const [scanType, setScanType] = useState<"Native" | "HTML5" | "none">("none");
     const [debugMsg, setDebugMsg] = useState("");
+    const [useHtml5, setUseHtml5] = useState(false);
+
+    const QR_REGEX = /(?:^|\/catch\/|code=)(stop-\d+)/;
 
     const stopStream = useCallback(() => {
         if (streamRef.current) {
@@ -27,38 +30,50 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
         }
     }, []);
 
+    const cleanup = useCallback(() => {
+        stopStream();
+        if (html5ScannerRef.current) {
+            html5ScannerRef.current.stop().catch(() => { });
+            html5ScannerRef.current = null;
+        }
+    }, [stopStream]);
+
     useEffect(() => {
         let cancelled = false;
 
         async function startScanner() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                });
-                if (cancelled) {
-                    stream.getTracks().forEach((t) => t.stop());
-                    return;
-                }
-                streamRef.current = stream;
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    await videoRef.current.play();
-                }
+            // Check if native BarcodeDetector is available
+            if ("BarcodeDetector" in window) {
+                // --- NATIVE FLOW: we manage the camera ourselves ---
+                setScanType("Native");
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" },
+                    });
+                    if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+                    streamRef.current = stream;
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                        await videoRef.current.play();
+                    }
 
-                // Try native BarcodeDetector first
-                if ("BarcodeDetector" in window) {
-                    setScanType("Native");
-                    const detector = new (window as unknown as { BarcodeDetector: new (opts: { formats: string[] }) => { detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]> } }).BarcodeDetector({ formats: ["qr_code"] });
+                    const detector = new (window as unknown as {
+                        BarcodeDetector: new (opts: { formats: string[] }) => {
+                            detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]>
+                        }
+                    }).BarcodeDetector({ formats: ["qr_code"] });
+
                     const scanFrame = async () => {
-                        if (cancelled || !videoRef.current || !scanning) return;
+                        if (cancelled || !videoRef.current) return;
                         try {
                             const barcodes = await detector.detect(videoRef.current);
                             if (barcodes.length > 0) {
                                 setLastScanned(barcodes[0].rawValue);
                             }
                             for (const barcode of barcodes) {
-                                const match = barcode.rawValue.match(/(?:^|\/catch\/|code=)(stop-\d+)/);
+                                const match = barcode.rawValue.match(QR_REGEX);
                                 if (match) {
+                                    cancelled = true;
                                     stopStream();
                                     router.push(`/catch/${match[1]}`);
                                     return;
@@ -70,27 +85,44 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                         if (!cancelled) requestAnimationFrame(scanFrame);
                     };
                     requestAnimationFrame(scanFrame);
-                } else {
-                    // Fallback: html5-qrcode
-                    setScanType("HTML5");
+                } catch {
+                    if (!cancelled) setError("No se pudo acceder a la cámara. Permite el acceso en los ajustes del navegador.");
+                }
+            } else {
+                // --- HTML5-QRCODE FLOW: library manages its own camera ---
+                setScanType("HTML5");
+                setUseHtml5(true);
+
+                // Small delay to ensure the container div is rendered and visible
+                await new Promise((r) => setTimeout(r, 150));
+
+                try {
                     const { Html5Qrcode } = await import("html5-qrcode");
-                    const scanner = new Html5Qrcode("qr-reader-hidden");
+                    if (cancelled) return;
+                    const scanner = new Html5Qrcode("qr-reader-html5");
+                    html5ScannerRef.current = scanner;
                     await scanner.start(
                         { facingMode: "environment" },
-                        { fps: 15 }, // Full frame scan
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
                         (decodedText) => {
-                            const match = decodedText.match(/(?:^|\/catch\/)(stop-\d+)/);
+                            setLastScanned(decodedText);
+                            const match = decodedText.match(QR_REGEX);
                             if (match) {
+                                cancelled = true;
                                 scanner.stop().catch(() => { });
-                                stopStream();
+                                html5ScannerRef.current = null;
                                 router.push(`/catch/${match[1]}`);
                             }
                         },
-                        () => { } // ignore errors
+                        () => { } // ignore scan errors
                     );
+                    if (cancelled) { scanner.stop().catch(() => { }); }
+                } catch (e) {
+                    if (!cancelled) {
+                        setDebugMsg("HTML5 Error: " + String(e));
+                        setError("No se pudo acceder a la cámara. Permite el acceso en los ajustes del navegador.");
+                    }
                 }
-            } catch {
-                if (!cancelled) setError("No se pudo acceder a la cámara. Permite el acceso en los ajustes del navegador.");
             }
         }
 
@@ -98,8 +130,12 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
         return () => {
             cancelled = true;
             stopStream();
+            if (html5ScannerRef.current) {
+                html5ScannerRef.current.stop().catch(() => { });
+                html5ScannerRef.current = null;
+            }
         };
-    }, [router, stopStream, scanning]);
+    }, [router, stopStream]);
 
     return (
         <div
@@ -133,25 +169,41 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                     border: "3px solid var(--color-primary)",
                     boxShadow: "var(--shadow-glow)",
                 }}>
-                    <video
-                        ref={videoRef}
+                    {/* Native BarcodeDetector: show manual video element */}
+                    {!useHtml5 && (
+                        <video
+                            ref={videoRef}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                            }}
+                            playsInline
+                            muted
+                        />
+                    )}
+
+                    {/* HTML5-qrcode fallback: library renders its own video here */}
+                    <div
+                        id="qr-reader-html5"
                         style={{
+                            display: useHtml5 ? "block" : "none",
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
                         }}
-                        playsInline
-                        muted
                     />
-                    {/* Scan overlay corners */}
-                    <div style={{
-                        position: "absolute",
-                        inset: "20%",
-                        border: "2px solid var(--color-primary)",
-                        borderRadius: "var(--radius-sm)",
-                        opacity: 0.6,
-                        pointerEvents: "none",
-                    }} />
+
+                    {/* Scan overlay corners (only for native) */}
+                    {!useHtml5 && (
+                        <div style={{
+                            position: "absolute",
+                            inset: "20%",
+                            border: "2px solid var(--color-primary)",
+                            borderRadius: "var(--radius-sm)",
+                            opacity: 0.6,
+                            pointerEvents: "none",
+                        }} />
+                    )}
                 </div>
             )}
 
@@ -179,11 +231,8 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                 Apunta al código QR de la parada
             </p>
 
-            {/* Hidden div for html5-qrcode fallback */}
-            <div id="qr-reader-hidden" style={{ display: "none" }} />
-
             <button
-                onClick={() => { stopStream(); onClose(); }}
+                onClick={() => { cleanup(); onClose(); }}
                 className="btn btn-secondary btn-small"
                 style={{
                     position: "absolute",
@@ -196,7 +245,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
             >
                 Cerrar
             </button>
-        </div >
+        </div>
     );
 }
 
