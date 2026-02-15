@@ -50,7 +50,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                         try {
                             const barcodes = await detector.detect(videoRef.current);
                             for (const barcode of barcodes) {
-                                const match = barcode.rawValue.match(/\/catch\/(stop-\d+)/);
+                                const match = barcode.rawValue.match(/(?:^|\/catch\/)(stop-\d+)/);
                                 if (match) {
                                     stopStream();
                                     router.push(`/catch/${match[1]}`);
@@ -69,7 +69,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                         { facingMode: "environment" },
                         { fps: 10, qrbox: { width: 250, height: 250 } },
                         (decodedText) => {
-                            const match = decodedText.match(/\/catch\/(stop-\d+)/);
+                            const match = decodedText.match(/(?:^|\/catch\/)(stop-\d+)/);
                             if (match) {
                                 scanner.stop().catch(() => { });
                                 stopStream();
