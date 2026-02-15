@@ -261,7 +261,8 @@ function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => v
                     position: "relative",
                     maxWidth: "100vw", maxHeight: "85dvh",
                     overflow: "auto",
-                    touchAction: "pinch-zoom",
+                    touchAction: "manipulation",
+                    WebkitOverflowScrolling: "touch",
                     borderRadius: "var(--radius-lg)",
                 }}
                 onClick={(e) => e.stopPropagation()}
