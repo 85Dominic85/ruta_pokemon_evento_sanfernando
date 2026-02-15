@@ -266,15 +266,18 @@ function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => v
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <img
-                    src="/images/mapa_ruta_pokeballs.png"
-                    alt="Mapa de la Ruta Pokémon"
-                    style={{
-                        width: "max(100vw, 600px)", height: "auto",
-                        display: "block", imageRendering: "pixelated",
-                    }}
-                />
-                <MapMarkers stops={stops} capturedPokemonIds={capturedPokemonIds} size="large" />
+                {/* Inner wrapper sizes to the image so markers use correct % base */}
+                <div style={{ position: "relative", display: "inline-block" }}>
+                    <img
+                        src="/images/mapa_ruta_pokeballs.png"
+                        alt="Mapa de la Ruta Pokémon"
+                        style={{
+                            width: "max(100vw, 600px)", height: "auto",
+                            display: "block", imageRendering: "pixelated",
+                        }}
+                    />
+                    <MapMarkers stops={stops} capturedPokemonIds={capturedPokemonIds} size="large" />
+                </div>
             </div>
 
             <p style={{
