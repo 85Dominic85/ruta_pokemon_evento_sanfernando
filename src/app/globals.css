@@ -2,11 +2,14 @@
 
 :root {
   /* Pokémon-inspired palette */
-  --color-primary: #FFCB05;       /* Pokémon yellow */
+  --color-primary: #FFCB05;
+  /* Pokémon yellow */
   --color-primary-dark: #C7A008;
-  --color-secondary: #3B4CCA;     /* Pokémon blue */
+  --color-secondary: #3B4CCA;
+  /* Pokémon blue */
   --color-secondary-light: #5B6FE6;
-  --color-accent: #FF0000;         /* Pokéball red */
+  --color-accent: #FF0000;
+  /* Pokéball red */
   --color-accent-dark: #CC0000;
   --color-bg: #1a1a2e;
   --color-bg-card: #16213e;
@@ -41,7 +44,9 @@
   --shadow-pokeball: 0 0 30px rgba(255, 0, 0, 0.2);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -256,7 +261,8 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding-top: 28px; /* room for the walking character */
+  padding-top: 28px;
+  /* room for the walking character */
 }
 
 .progress-bar {
@@ -277,84 +283,17 @@ body {
   position: relative;
 }
 
-/* Walking trainer character */
+/* Walking trainer character - positioned ABOVE the bar */
 .progress-fill::after {
   content: '';
   position: absolute;
-  right: -10px;
-  bottom: 4px;
-  width: 20px;
-  height: 28px;
+  right: -12px;
+  bottom: 100%;
+  width: 24px;
+  height: 32px;
+  background: url('/images/trainer-walk.gif') center/contain no-repeat;
   image-rendering: pixelated;
-  animation: trainer-walk 0.5s steps(1) infinite;
-}
-
-/* Pixel-art trainer using box-shadow sprites */
-.progress-fill::after {
-  background: transparent;
-  box-shadow:
-    /* Frame: simple trainer profile - hat */
-    7px 0 0 0 #CC0000,
-    8px 0 0 0 #CC0000,
-    9px 0 0 0 #CC0000,
-    10px 0 0 0 #CC0000,
-    11px 0 0 0 #CC0000,
-    6px 2px 0 0 #CC0000,
-    7px 2px 0 0 #CC0000,
-    8px 2px 0 0 #CC0000,
-    9px 2px 0 0 #CC0000,
-    10px 2px 0 0 #CC0000,
-    11px 2px 0 0 #CC0000,
-    12px 2px 0 0 #CC0000,
-    /* Face */
-    8px 4px 0 0 #FFD9A0,
-    9px 4px 0 0 #FFD9A0,
-    10px 4px 0 0 #FFD9A0,
-    8px 6px 0 0 #FFD9A0,
-    9px 6px 0 0 #333,
-    10px 6px 0 0 #FFD9A0,
-    /* Body - jacket */
-    7px 8px 0 0 #3B4CCA,
-    8px 8px 0 0 #3B4CCA,
-    9px 8px 0 0 #3B4CCA,
-    10px 8px 0 0 #3B4CCA,
-    11px 8px 0 0 #3B4CCA,
-    7px 10px 0 0 #3B4CCA,
-    8px 10px 0 0 #3B4CCA,
-    9px 10px 0 0 #3B4CCA,
-    10px 10px 0 0 #3B4CCA,
-    11px 10px 0 0 #FFD9A0,
-    /* Arms */
-    6px 10px 0 0 #FFD9A0,
-    12px 8px 0 0 #FFD9A0,
-    /* Pants */
-    8px 12px 0 0 #1a1a2e,
-    9px 12px 0 0 #1a1a2e,
-    10px 12px 0 0 #1a1a2e,
-    /* Legs - walking frame 1 */
-    7px 14px 0 0 #1a1a2e,
-    8px 14px 0 0 #1a1a2e,
-    10px 14px 0 0 #1a1a2e,
-    11px 14px 0 0 #1a1a2e,
-    /* Shoes */
-    7px 16px 0 0 #CC0000,
-    11px 16px 0 0 #CC0000;
-  animation: trainer-walk 0.4s steps(1) infinite;
-}
-
-@keyframes trainer-walk {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  25% {
-    transform: translateY(-1px);
-  }
-  50% {
-    transform: translateY(0px);
-  }
-  75% {
-    transform: translateY(-1px);
-  }
+  pointer-events: none;
 }
 
 .progress-text {
@@ -388,8 +327,15 @@ body {
 }
 
 @keyframes shimmer {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
 }
 
 .pokemon-image-container {
@@ -446,7 +392,8 @@ body {
   text-transform: uppercase;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--color-primary);
   background: rgba(255, 203, 5, 0.1);
 }
@@ -457,6 +404,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -464,19 +412,41 @@ body {
 }
 
 @keyframes bounceIn {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes pokeball-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
 .animate-fade-in {
@@ -488,11 +458,25 @@ body {
 }
 
 /* Staggered animations */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+
+.stagger-2 {
+  animation-delay: 0.2s;
+}
+
+.stagger-3 {
+  animation-delay: 0.3s;
+}
+
+.stagger-4 {
+  animation-delay: 0.4s;
+}
+
+.stagger-5 {
+  animation-delay: 0.5s;
+}
 
 /* === CONFETTI PARTICLES === */
 .confetti-container {
@@ -596,7 +580,7 @@ body {
 
 .pokeball-captured .pokeball-button {
   animation: pokeball-pulse 0.5s ease-in-out 0.5s 3,
-             pokeball-click 0.4s ease-out 2.3s forwards;
+    pokeball-click 0.4s ease-out 2.3s forwards;
 }
 
 @keyframes pokeball-drop {
@@ -604,13 +588,16 @@ body {
     transform: translateY(-120px) scale(0.5);
     opacity: 0;
   }
+
   60% {
     transform: translateY(10px) scale(1.05);
     opacity: 1;
   }
+
   80% {
     transform: translateY(-5px) scale(0.98);
   }
+
   100% {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -618,17 +605,36 @@ body {
 }
 
 @keyframes pokeball-wobble {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-20deg); }
-  40% { transform: rotate(20deg); }
-  60% { transform: rotate(-15deg); }
-  80% { transform: rotate(15deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  20% {
+    transform: rotate(-20deg);
+  }
+
+  40% {
+    transform: rotate(20deg);
+  }
+
+  60% {
+    transform: rotate(-15deg);
+  }
+
+  80% {
+    transform: rotate(15deg);
+  }
 }
 
 @keyframes pokeball-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
   }
+
   50% {
     box-shadow: 0 0 20px 8px rgba(255, 255, 255, 0.6);
   }
@@ -639,10 +645,12 @@ body {
     box-shadow: 0 0 0 0 rgba(255, 203, 5, 0);
     background: #f0f0f0;
   }
+
   50% {
     box-shadow: 0 0 30px 15px rgba(255, 203, 5, 0.8);
     background: var(--color-primary);
   }
+
   100% {
     box-shadow: 0 0 10px 4px rgba(255, 203, 5, 0.3);
     background: var(--color-primary);
@@ -655,9 +663,12 @@ body {
 }
 
 @keyframes map-marker-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.5);
   }
+
   50% {
     box-shadow: 0 0 0 10px rgba(255, 203, 5, 0);
   }
@@ -665,7 +676,10 @@ body {
 
 /* === REDUCED MOTION === */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
