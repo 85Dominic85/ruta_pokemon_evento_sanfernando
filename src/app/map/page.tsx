@@ -16,6 +16,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
     const streamRef = useRef<MediaStream | null>(null);
     const [error, setError] = useState("");
     const [scanning, setScanning] = useState(true);
+    const [lastScanned, setLastScanned] = useState("");
 
     const stopStream = useCallback(() => {
         if (streamRef.current) {
@@ -49,15 +50,20 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                         if (cancelled || !videoRef.current || !scanning) return;
                         try {
                             const barcodes = await detector.detect(videoRef.current);
+                            if (barcodes.length > 0) {
+                                setLastScanned(barcodes[0].rawValue);
+                            }
                             for (const barcode of barcodes) {
-                                const match = barcode.rawValue.match(/(?:^|\/catch\/)(stop-\d+)/);
+                                const match = barcode.rawValue.match(/(?:^|\/catch\/|code=)(stop-\d+)/);
                                 if (match) {
                                     stopStream();
                                     router.push(`/catch/${match[1]}`);
                                     return;
                                 }
                             }
-                        } catch { /* frame detection error, continue */ }
+                        } catch (e) {
+                            // ignore frame errors 
+                        }
                         if (!cancelled) requestAnimationFrame(scanFrame);
                     };
                     requestAnimationFrame(scanFrame);
@@ -145,6 +151,21 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                 </div>
             )}
 
+            {/* Debug info */}
+            <div style={{
+                marginTop: "10px",
+                padding: "8px",
+                background: "rgba(0,0,0,0.5)",
+                borderRadius: "4px",
+                fontSize: "0.7rem",
+                color: "#ffc",
+                maxWidth: "90%",
+                wordBreak: "break-all",
+                textAlign: "center"
+            }}>
+                DEBUG: {lastScanned || "Esperando..."}
+            </div>
+
             <p className="page-subtitle" style={{ marginTop: "var(--space-md)", fontSize: "0.75rem" }}>
                 Apunta al código QR de la parada
             </p>
@@ -166,7 +187,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
             >
                 Cerrar
             </button>
-        </div>
+        </div >
     );
 }
 
