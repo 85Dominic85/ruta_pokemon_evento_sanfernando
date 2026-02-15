@@ -26,11 +26,11 @@ async function main() {
 
     // Seed Pokémon
     const pokemon = [
-        { id: 1, name: "Tortillita", imagePath: "/pokemon-local/001-tortillita.png", flavorText: "Nacida del mar gaditano, Tortillita cruje con cada paso y deja un aroma irresistible a su alrededor.", stopId: 1 },
-        { id: 2, name: "Bienmesabe", imagePath: "/pokemon-local/002-bienmesabe.png", flavorText: "Dulce y misterioso, Bienmesabe seduce con su textura suave y su poder reconfortante.", stopId: 2 },
-        { id: 3, name: "Camarón", imagePath: "/pokemon-local/003-camaron.png", flavorText: "Ágil como las corrientes de la Bahía, Camarón salta entre las olas con energía inagotable.", stopId: 3 },
-        { id: 4, name: "Cañaíla", imagePath: "/pokemon-local/004-canaila.png", flavorText: "Astuta y callejera, Cañaíla conoce cada rincón de San Fernando y siempre encuentra un atajo.", stopId: 4 },
-        { id: 5, name: "Salmarín", imagePath: "/pokemon-local/005-salmarin.png", flavorText: "Guardián de las salinas, Salmarín brilla bajo el sol con cristales de sal en su piel.", stopId: 5 },
+        { id: 1, name: "Tortillita", imagePath: "/pokemon-local/001-tortillita.png", flavorText: "Se dice que este pequeño Pokémon nació una tarde en las marismas de San Fernando, cuando el aroma del aceite caliente se mezcló con la brisa del mar. Los camarones recién traídos del estero y la masa dorada dieron forma a una criatura alegre y crujiente. Desde entonces, aparece donde hay risas, feria y buen ambiente, dejando tras de sí el inconfundible sonido de su “crujido” legendario.", stopId: 1 },
+        { id: 2, name: "Bienmesabe", imagePath: "/pokemon-local/002-bienmesabe.png", flavorText: "En las aguas de San Fernando, donde el estero se funde con el Atlántico, nació Bienmesabe. Inspirado en el famoso adobo isleño, este Pokémon combina la fuerza del mar con el sabor de la tradición. Dicen que aparece cuando el viento trae aroma a freiduría y que su mordida es tan intensa como el carácter de La Isla.", stopId: 2 },
+        { id: 3, name: "Camarón", imagePath: "/pokemon-local/003-camaron.png", flavorText: "Bajo la luna de La Isla, este pequeño Pokémon de una sola pinza canta con tal sentimiento que hasta las olas marcan el compás. Su voz no se escucha… se siente.", stopId: 3 },
+        { id: 4, name: "Cañaíla", imagePath: "/pokemon-local/004-canaila.png", flavorText: "Vive aferrada a las rocas del estero en San Fernando. Cuando sube la marea, asoma entre la espuma, protegiéndose con su dura concha y sus afilados pinchos.", stopId: 4 },
+        { id: 5, name: "Salmarín", imagePath: "/pokemon-local/005-salmarin.png", flavorText: "Nace en las salinas de San Fernando cuando el sol cristaliza la sal del estero. Silencioso y brillante, protege el paisaje reflejando la luz del atardecer sobre las aguas tranquilas.", stopId: 5 },
     ];
 
     for (const p of pokemon) {
