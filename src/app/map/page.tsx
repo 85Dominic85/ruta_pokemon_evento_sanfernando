@@ -17,6 +17,8 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
     const [error, setError] = useState("");
     const [scanning, setScanning] = useState(true);
     const [lastScanned, setLastScanned] = useState("");
+    const [scanType, setScanType] = useState<"Native" | "HTML5" | "none">("none");
+    const [debugMsg, setDebugMsg] = useState("");
 
     const stopStream = useCallback(() => {
         if (streamRef.current) {
@@ -45,6 +47,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
 
                 // Try native BarcodeDetector first
                 if ("BarcodeDetector" in window) {
+                    setScanType("Native");
                     const detector = new (window as unknown as { BarcodeDetector: new (opts: { formats: string[] }) => { detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]> } }).BarcodeDetector({ formats: ["qr_code"] });
                     const scanFrame = async () => {
                         if (cancelled || !videoRef.current || !scanning) return;
@@ -62,18 +65,19 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                                 }
                             }
                         } catch (e) {
-                            // ignore frame errors 
+                            setDebugMsg("Native Error: " + String(e));
                         }
                         if (!cancelled) requestAnimationFrame(scanFrame);
                     };
                     requestAnimationFrame(scanFrame);
                 } else {
                     // Fallback: html5-qrcode
+                    setScanType("HTML5");
                     const { Html5Qrcode } = await import("html5-qrcode");
                     const scanner = new Html5Qrcode("qr-reader-hidden");
                     await scanner.start(
                         { facingMode: "environment" },
-                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        { fps: 15 }, // Full frame scan
                         (decodedText) => {
                             const match = decodedText.match(/(?:^|\/catch\/)(stop-\d+)/);
                             if (match) {
@@ -161,9 +165,14 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                 color: "#ffc",
                 maxWidth: "90%",
                 wordBreak: "break-all",
-                textAlign: "center"
+                zIndex: 201,
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px"
             }}>
-                DEBUG: {lastScanned || "Esperando..."}
+                <div>Scanner: <strong>{scanType}</strong></div>
+                <div>Last: {lastScanned || "Esperando..."}</div>
+                {debugMsg && <div style={{ color: "#ff6b6b", fontSize: "0.6rem" }}>{debugMsg}</div>}
             </div>
 
             <p className="page-subtitle" style={{ marginTop: "var(--space-md)", fontSize: "0.75rem" }}>
