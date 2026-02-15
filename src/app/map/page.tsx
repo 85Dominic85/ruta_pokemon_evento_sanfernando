@@ -171,10 +171,11 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
 }
 
 function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: typeof STOPS; capturedPokemonIds: number[]; size?: "small" | "large" }) {
-    const markerSize = size === "large" ? 34 : 26;
-    const fontSize = size === "large" ? "11px" : "9px";
-    const labelSize = size === "large" ? "8px" : "6px";
-    const labelNameSize = size === "large" ? "7px" : "5px";
+    const markerSize = size === "large" ? 38 : 30;
+    const fontSize = size === "large" ? "12px" : "10px";
+    const labelSize = size === "large" ? "9px" : "7px";
+    const labelNameSize = size === "large" ? "8px" : "6px";
+    const borderWidth = size === "large" ? 5 : 4;
 
     return (
         <>
@@ -199,12 +200,14 @@ function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: type
                             style={{
                                 width: `${markerSize}px`, height: `${markerSize}px`,
                                 borderRadius: "50%",
-                                background: isCaptured ? "rgba(255,203,5,0.9)" : "rgba(60,60,90,0.85)",
-                                border: `3px solid ${isCaptured ? "#C7A008" : "#5a5a7a"}`,
+                                background: isCaptured ? "#FFCB05" : "#FFFFFF",
+                                border: `${borderWidth}px solid #1a1a2e`,
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                boxShadow: isCaptured ? "0 0 10px rgba(255,203,5,0.5)" : "0 2px 6px rgba(0,0,0,0.5)",
+                                boxShadow: isCaptured
+                                    ? "0 0 0 2px rgba(255,203,5,0.6), 0 0 12px rgba(255,203,5,0.5), 0 2px 8px rgba(0,0,0,0.6)"
+                                    : "0 0 0 2px rgba(255,255,255,0.3), 0 2px 8px rgba(0,0,0,0.6)",
                                 fontSize, fontWeight: "bold",
-                                color: isCaptured ? "#1a1a2e" : "#ccc",
+                                color: isCaptured ? "#1a1a2e" : "#FF0000",
                                 fontFamily: "'Press Start 2P', monospace",
                             }}
                         >
@@ -216,10 +219,12 @@ function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: type
                             top: "100%", left: "50%",
                             transform: "translateX(-50%)",
                             whiteSpace: "nowrap",
-                            fontSize: labelSize, fontWeight: 600,
-                            color: isCaptured ? "#FFCB05" : "#6a6a8a",
-                            textShadow: "0 1px 3px rgba(0,0,0,0.9)",
-                            marginTop: "2px",
+                            fontSize: labelSize, fontWeight: 700,
+                            color: isCaptured ? "#FFF" : "#ddd",
+                            background: "rgba(0,0,0,0.8)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginTop: "3px",
                             textAlign: "center",
                         }}>
                             {isCaptured

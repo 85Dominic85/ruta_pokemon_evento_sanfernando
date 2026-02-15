@@ -16,8 +16,8 @@ export const STOPS: StopData[] = [
         slug: "museo",
         order: 1,
         qrCode: "stop-1",
-        mapX: 72,
-        mapY: 10,
+        mapX: 70,
+        mapY: 15,
     },
     {
         id: 2,
@@ -25,8 +25,8 @@ export const STOPS: StopData[] = [
         slug: "iglesia-mayor",
         order: 2,
         qrCode: "stop-2",
-        mapX: 60,
-        mapY: 40,
+        mapX: 55,
+        mapY: 35,
     },
     {
         id: 3,
@@ -34,8 +34,8 @@ export const STOPS: StopData[] = [
         slug: "ayuntamiento",
         order: 3,
         qrCode: "stop-3",
-        mapX: 30,
-        mapY: 48,
+        mapX: 38,
+        mapY: 38,
     },
     {
         id: 4,
@@ -43,8 +43,8 @@ export const STOPS: StopData[] = [
         slug: "teatro-cortes",
         order: 4,
         qrCode: "stop-4",
-        mapX: 15,
-        mapY: 58,
+        mapX: 20,
+        mapY: 68,
     },
     {
         id: 5,
@@ -52,8 +52,8 @@ export const STOPS: StopData[] = [
         slug: "dragon-rojo",
         order: 5,
         qrCode: "stop-5",
-        mapX: 88,
-        mapY: 88,
+        mapX: 82,
+        mapY: 82,
     },
 ];
 
