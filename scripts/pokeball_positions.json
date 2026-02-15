@@ -1,0 +1,63 @@
+{
+  "imageWidth": 2048,
+  "imageHeight": 1365,
+  "count": 7,
+  "pokeballs": [
+    {
+      "cx": 331,
+      "cy": 820,
+      "pctX": 16.16,
+      "pctY": 60.07,
+      "bestScore": 352,
+      "detections": 109
+    },
+    {
+      "cx": 590,
+      "cy": 431,
+      "pctX": 28.81,
+      "pctY": 31.58,
+      "bestScore": 352,
+      "detections": 128
+    },
+    {
+      "cx": 745,
+      "cy": 307,
+      "pctX": 36.38,
+      "pctY": 22.49,
+      "bestScore": 352,
+      "detections": 110
+    },
+    {
+      "cx": 1113,
+      "cy": 451,
+      "pctX": 54.35,
+      "pctY": 33.04,
+      "bestScore": 352,
+      "detections": 127
+    },
+    {
+      "cx": 1151,
+      "cy": 567,
+      "pctX": 56.2,
+      "pctY": 41.54,
+      "bestScore": 128,
+      "detections": 3
+    },
+    {
+      "cx": 1339,
+      "cy": 261,
+      "pctX": 65.38,
+      "pctY": 19.12,
+      "bestScore": 352,
+      "detections": 124
+    },
+    {
+      "cx": 1357,
+      "cy": 567,
+      "pctX": 66.26,
+      "pctY": 41.54,
+      "bestScore": 127,
+      "detections": 3
+    }
+  ]
+}

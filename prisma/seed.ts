@@ -8,11 +8,11 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     // Seed stops
     const stops = [
-        { id: 1, name: "Antiguo Museo de San Fernando", slug: "museo", order: 1, qrCode: "stop-1", active: true },
-        { id: 2, name: "Iglesia Mayor", slug: "iglesia-mayor", order: 2, qrCode: "stop-2", active: true },
-        { id: 3, name: "Ayuntamiento de San Fernando", slug: "ayuntamiento", order: 3, qrCode: "stop-3", active: true },
-        { id: 4, name: "Real Teatro de las Cortes", slug: "teatro-cortes", order: 4, qrCode: "stop-4", active: true },
-        { id: 5, name: "Tienda El Dragón Rojo", slug: "dragon-rojo", order: 5, qrCode: "stop-5", active: true },
+        { id: 1, name: "Antiguo Museo de San Fernando", slug: "museo", order: 1, qrCode: "stop-1", active: true, mapX: 65.4, mapY: 19.2 },
+        { id: 2, name: "Iglesia Mayor", slug: "iglesia-mayor", order: 2, qrCode: "stop-2", active: true, mapX: 54.3, mapY: 33.3 },
+        { id: 3, name: "Ayuntamiento de San Fernando", slug: "ayuntamiento", order: 3, qrCode: "stop-3", active: true, mapX: 16.1, mapY: 60.2 },
+        { id: 4, name: "Real Teatro de las Cortes", slug: "teatro-cortes", order: 4, qrCode: "stop-4", active: true, mapX: 28.8, mapY: 31.8 },
+        { id: 5, name: "Tienda El Dragón Rojo", slug: "dragon-rojo", order: 5, qrCode: "stop-5", active: true, mapX: 36.3, mapY: 22.7 },
     ];
 
     for (const stop of stops) {

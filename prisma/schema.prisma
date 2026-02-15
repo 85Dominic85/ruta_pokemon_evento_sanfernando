@@ -26,6 +26,8 @@ model Stop {
   order    Int
   qrCode   String         @unique
   active   Boolean        @default(true)
+  mapX     Float          @default(50.0)
+  mapY     Float          @default(50.0)
   pokemon  PokemonLocal[]
 }
 

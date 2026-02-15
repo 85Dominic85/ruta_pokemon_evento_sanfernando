@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { STOPS } from "@/lib/stops";
+import { STOPS, type StopData } from "@/lib/stops";
 import { POKEMON_LOCAL } from "@/lib/pokemon";
 
 interface CaptureData {
@@ -71,12 +71,12 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
                         (decodedText) => {
                             const match = decodedText.match(/\/catch\/(stop-\d+)/);
                             if (match) {
-                                scanner.stop().catch(() => {});
+                                scanner.stop().catch(() => { });
                                 stopStream();
                                 router.push(`/catch/${match[1]}`);
                             }
                         },
-                        () => {} // ignore errors
+                        () => { } // ignore errors
                     );
                 }
             } catch {
@@ -170,7 +170,7 @@ function QRScannerModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: typeof STOPS; capturedPokemonIds: number[]; size?: "small" | "large" }) {
+function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: StopData[]; capturedPokemonIds: number[]; size?: "small" | "large" }) {
     const markerSize = size === "large" ? 38 : 30;
     const fontSize = size === "large" ? "12px" : "10px";
     const labelSize = size === "large" ? "9px" : "7px";
@@ -244,7 +244,7 @@ function MapMarkers({ stops, capturedPokemonIds, size = "small" }: { stops: type
     );
 }
 
-function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => void; stops: typeof STOPS; capturedPokemonIds: number[] }) {
+function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => void; stops: StopData[]; capturedPokemonIds: number[] }) {
     return (
         <div
             style={{
@@ -267,7 +267,7 @@ function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => v
                 onClick={(e) => e.stopPropagation()}
             >
                 <img
-                    src="/images/mapa-ruta-opt.png"
+                    src="/images/mapa_ruta_pokeballs.png"
                     alt="Mapa de la Ruta Pokémon"
                     style={{
                         width: "max(100vw, 600px)", height: "auto",
@@ -301,6 +301,7 @@ function FullMapModal({ onClose, stops, capturedPokemonIds }: { onClose: () => v
 export default function MapPage() {
     const router = useRouter();
     const [captures, setCaptures] = useState<CaptureData[]>([]);
+    const [allStops, setAllStops] = useState<StopData[]>(STOPS);
     const [loading, setLoading] = useState(true);
     const [showScanner, setShowScanner] = useState(false);
     const [showFullMap, setShowFullMap] = useState(false);
@@ -311,6 +312,16 @@ export default function MapPage() {
             router.push("/welcome");
             return;
         }
+
+        // Fetch dynamic stop positions from API
+        fetch("/api/stops")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.ok && data.stops.length > 0) {
+                    setAllStops(data.stops);
+                }
+            })
+            .catch(() => { /* fallback to static STOPS */ });
 
         fetch(`/api/participant/me?email=${encodeURIComponent(email)}`)
             .then((res) => res.json())
@@ -327,13 +338,13 @@ export default function MapPage() {
     const capturedPokemonIds = captures.map((c) => c.pokemonId);
 
     // Calculate which stops are visible
-    const capturedOrders = STOPS.filter((stop) => {
+    const capturedOrders = allStops.filter((stop) => {
         const pokemon = POKEMON_LOCAL.find((p) => p.stopId === stop.id);
         return pokemon && capturedPokemonIds.includes(pokemon.id);
     }).map((s) => s.order);
 
     const maxVisibleOrder = capturedOrders.length > 0 ? Math.max(...capturedOrders) + 1 : 1;
-    const visibleStops = STOPS.filter((s) => s.order <= maxVisibleOrder);
+    const visibleStops = allStops.filter((s) => s.order <= maxVisibleOrder);
 
     if (loading) {
         return (
@@ -374,7 +385,7 @@ export default function MapPage() {
                     onClick={() => setShowFullMap(true)}
                 >
                     <img
-                        src="/images/mapa-ruta-opt.png"
+                        src="/images/mapa_ruta_pokeballs.png"
                         alt="Mapa de la Ruta Pokemon"
                         style={{ width: "100%", height: "auto", display: "block", imageRendering: "pixelated" }}
                     />

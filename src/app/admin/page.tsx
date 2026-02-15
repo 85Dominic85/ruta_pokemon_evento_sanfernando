@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { POKEMON_LOCAL } from "@/lib/pokemon";
 
@@ -21,7 +21,7 @@ interface Metrics {
     capturesByPokemon: { pokemonId: number; _count: { pokemonId: number } }[];
 }
 
-type Tab = "metrics" | "participants" | "stops" | "verify";
+type Tab = "metrics" | "participants" | "stops" | "mapa" | "verify";
 
 export default function AdminPage() {
     const router = useRouter();
@@ -235,7 +235,7 @@ export default function AdminPage() {
 
             {/* Tabs */}
             <div className="admin-tabs">
-                {(["metrics", "participants", "stops", "verify"] as Tab[]).map((t) => (
+                {(["metrics", "participants", "stops", "mapa", "verify"] as Tab[]).map((t) => (
                     <button
                         key={t}
                         className={`admin-tab ${tab === t ? "active" : ""}`}
@@ -244,6 +244,7 @@ export default function AdminPage() {
                         {t === "metrics" && "📊 Métricas"}
                         {t === "participants" && "👥 Participantes"}
                         {t === "stops" && "📍 Paradas"}
+                        {t === "mapa" && "🗺️ Mapa"}
                         {t === "verify" && "✅ Verificar"}
                     </button>
                 ))}
@@ -408,6 +409,9 @@ export default function AdminPage() {
             {/* Stops Tab */}
             {tab === "stops" && <StopsManager />}
 
+            {/* Mapa Tab */}
+            {tab === "mapa" && <MapEditor />}
+
             {/* Verify Tab */}
             {tab === "verify" && (
                 <div className="card" style={{ maxWidth: "500px" }}>
@@ -505,6 +509,281 @@ function StopsManager() {
                     ))}
                 </tbody>
             </table>
+        </div>
+    );
+}
+
+interface MarkerStop {
+    id: number;
+    name: string;
+    order: number;
+    mapX: number;
+    mapY: number;
+}
+
+function MapEditor() {
+    const [stops, setStops] = useState<MarkerStop[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState("");
+    const [selectedStop, setSelectedStop] = useState<number | null>(null);
+    const [dragging, setDragging] = useState<number | null>(null);
+    const mapRef = useRef<HTMLDivElement>(null);
+
+    const fetchStops = useCallback(async () => {
+        try {
+            const res = await fetch("/api/stops");
+            const data = await res.json();
+            if (data.ok) {
+                setStops(data.stops.map((s: MarkerStop) => ({
+                    id: s.id, name: s.name, order: s.order, mapX: s.mapX, mapY: s.mapY,
+                })));
+            }
+        } catch { /* ignore */ }
+        setLoading(false);
+    }, []);
+
+    useEffect(() => { fetchStops(); }, [fetchStops]);
+
+    const getPercentCoords = useCallback((clientX: number, clientY: number) => {
+        if (!mapRef.current) return null;
+        const rect = mapRef.current.getBoundingClientRect();
+        const x = ((clientX - rect.left) / rect.width) * 100;
+        const y = ((clientY - rect.top) / rect.height) * 100;
+        return {
+            mapX: Math.round(Math.max(0, Math.min(100, x)) * 10) / 10,
+            mapY: Math.round(Math.max(0, Math.min(100, y)) * 10) / 10,
+        };
+    }, []);
+
+    const handleMapClick = useCallback((e: React.MouseEvent) => {
+        if (selectedStop === null || dragging !== null) return;
+        const coords = getPercentCoords(e.clientX, e.clientY);
+        if (!coords) return;
+        setStops((prev) =>
+            prev.map((s) => s.id === selectedStop ? { ...s, ...coords } : s)
+        );
+    }, [selectedStop, dragging, getPercentCoords]);
+
+    const handlePointerDown = useCallback((e: React.PointerEvent, stopId: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(stopId);
+        setSelectedStop(stopId);
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    }, []);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent) => {
+        if (dragging === null) return;
+        const coords = getPercentCoords(e.clientX, e.clientY);
+        if (!coords) return;
+        setStops((prev) =>
+            prev.map((s) => s.id === dragging ? { ...s, ...coords } : s)
+        );
+    }, [dragging, getPercentCoords]);
+
+    const handlePointerUp = useCallback(() => {
+        setDragging(null);
+    }, []);
+
+    const handleSave = useCallback(async () => {
+        setSaving(true);
+        try {
+            for (const stop of stops) {
+                await fetch("/api/admin/stop/update-position", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ stopId: stop.id, mapX: stop.mapX, mapY: stop.mapY }),
+                    credentials: "include",
+                });
+            }
+            setMessage("✅ Posiciones guardadas. Los jugadores verán los cambios al recargar.");
+        } catch {
+            setMessage("❌ Error al guardar posiciones.");
+        }
+        setSaving(false);
+        setTimeout(() => setMessage(""), 4000);
+    }, [stops]);
+
+    if (loading) return <div className="loading-spinner" />;
+
+    return (
+        <div>
+            {/* Instructions */}
+            <div className="card" style={{ marginBottom: "var(--space-md)" }}>
+                <h3 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.65rem", color: "var(--color-primary)", marginBottom: "var(--space-sm)" }}>
+                    Editor de Marcadores del Mapa
+                </h3>
+                <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+                    1. Selecciona una parada en la lista de abajo<br />
+                    2. Haz click en el mapa o arrastra el marcador para reposicionarlo<br />
+                    3. Pulsa &quot;Guardar posiciones&quot; para aplicar los cambios
+                </p>
+
+                {/* Stop selector */}
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "var(--space-md)" }}>
+                    {stops.map((stop) => (
+                        <button
+                            key={stop.id}
+                            className={`btn btn-small ${selectedStop === stop.id ? "btn-primary" : "btn-secondary"}`}
+                            onClick={() => setSelectedStop(selectedStop === stop.id ? null : stop.id)}
+                            style={{ fontSize: "0.7rem", padding: "6px 10px" }}
+                        >
+                            {stop.order}. {stop.name}
+                        </button>
+                    ))}
+                </div>
+
+                {selectedStop !== null && (
+                    <p style={{ fontSize: "0.75rem", color: "#4ade80" }}>
+                        📍 Parada seleccionada: <strong>{stops.find((s) => s.id === selectedStop)?.name}</strong>
+                        {" — "}
+                        Haz click en el mapa o arrastra el marcador
+                    </p>
+                )}
+            </div>
+
+            {/* Map with draggable markers */}
+            <div
+                ref={mapRef}
+                style={{
+                    position: "relative",
+                    width: "100%",
+                    maxWidth: "900px",
+                    borderRadius: "var(--radius-lg)",
+                    overflow: "hidden",
+                    border: selectedStop !== null ? "3px solid var(--color-primary)" : "2px solid rgba(255,203,5,0.3)",
+                    cursor: selectedStop !== null ? "crosshair" : "default",
+                    userSelect: "none",
+                    touchAction: "none",
+                }}
+                onClick={handleMapClick}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+            >
+                <img
+                    src="/images/mapa_ruta_pokeballs.png"
+                    alt="Mapa de la Ruta Pokémon"
+                    style={{ width: "100%", height: "auto", display: "block", imageRendering: "pixelated", pointerEvents: "none" }}
+                    draggable={false}
+                />
+
+                {/* Markers */}
+                {stops.map((stop) => {
+                    const isSelected = selectedStop === stop.id;
+                    const isDragging = dragging === stop.id;
+                    return (
+                        <div
+                            key={stop.id}
+                            style={{
+                                position: "absolute",
+                                left: `${stop.mapX}%`,
+                                top: `${stop.mapY}%`,
+                                transform: "translate(-50%, -50%)",
+                                zIndex: isSelected || isDragging ? 30 : 10,
+                                cursor: "grab",
+                                touchAction: "none",
+                            }}
+                            onPointerDown={(e) => handlePointerDown(e, stop.id)}
+                        >
+                            {/* Marker circle */}
+                            <div
+                                style={{
+                                    width: "36px",
+                                    height: "36px",
+                                    borderRadius: "50%",
+                                    background: isSelected ? "#FFCB05" : "#FFFFFF",
+                                    border: `4px solid ${isSelected ? "#FF0000" : "#1a1a2e"}`,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "12px",
+                                    fontWeight: "bold",
+                                    color: isSelected ? "#1a1a2e" : "#FF0000",
+                                    fontFamily: "'Press Start 2P', monospace",
+                                    boxShadow: isSelected
+                                        ? "0 0 0 3px rgba(255,0,0,0.6), 0 0 20px rgba(255,203,5,0.7)"
+                                        : "0 0 0 2px rgba(255,255,255,0.3), 0 2px 8px rgba(0,0,0,0.6)",
+                                    transition: isDragging ? "none" : "box-shadow 0.2s, background 0.2s",
+                                }}
+                            >
+                                {stop.order}
+                            </div>
+                            {/* Label */}
+                            <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                whiteSpace: "nowrap",
+                                fontSize: "8px",
+                                fontWeight: 700,
+                                color: "#fff",
+                                background: isSelected ? "rgba(255,0,0,0.85)" : "rgba(0,0,0,0.8)",
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                marginTop: "3px",
+                                textAlign: "center",
+                                pointerEvents: "none",
+                            }}>
+                                {stop.name.length > 18 ? stop.name.slice(0, 15) + "..." : stop.name}
+                                <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "7px" }}>
+                                    ({stop.mapX}%, {stop.mapY}%)
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Save button */}
+            <div style={{ display: "flex", gap: "var(--space-md)", marginTop: "var(--space-lg)", alignItems: "center" }}>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{ minWidth: "200px" }}
+                >
+                    {saving ? "Guardando..." : "💾 Guardar posiciones"}
+                </button>
+                {message && (
+                    <span style={{ fontSize: "0.85rem" }}>{message}</span>
+                )}
+            </div>
+
+            {/* Coordinates table */}
+            <div className="card" style={{ marginTop: "var(--space-lg)" }}>
+                <h4 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-primary)", marginBottom: "var(--space-sm)" }}>
+                    Coordenadas actuales
+                </h4>
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Parada</th>
+                            <th>X (%)</th>
+                            <th>Y (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {stops.map((stop) => (
+                            <tr
+                                key={stop.id}
+                                style={{
+                                    background: selectedStop === stop.id ? "rgba(255,203,5,0.15)" : undefined,
+                                    cursor: "pointer",
+                                }}
+                                onClick={() => setSelectedStop(stop.id)}
+                            >
+                                <td>{stop.order}</td>
+                                <td>{stop.name}</td>
+                                <td style={{ fontFamily: "monospace" }}>{stop.mapX}</td>
+                                <td style={{ fontFamily: "monospace" }}>{stop.mapY}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

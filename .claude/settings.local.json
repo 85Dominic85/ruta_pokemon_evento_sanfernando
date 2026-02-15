@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"E:\\\\Proyectos\\\\Api evento pokemon\\\\public\\\\pokemon-local\")",
+      "Bash(dir:*)",
+      "Bash(npx next build)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(wc:*)",
+      "Bash(node -e:*)",
+      "Bash(psql:*)",
+      "Bash(DATABASE_URL='postgresql://neondb_owner:npg_j5GkWF4ZUfJE@ep-rapid-feather-agsulml9-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require' node:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(DATABASE_URL='postgresql://neondb_owner:npg_j5GkWF4ZUfJE@ep-rapid-feather-agsulml9-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require' npx tsx:*)",
+      "Bash(DATABASE_URL='postgresql://neondb_owner:npg_j5GkWF4ZUfJE@ep-rapid-feather-agsulml9-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require' npx prisma db push:*)",
+      "Bash(npx vercel:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls \"E:\\\\Proyectos\\\\Api evento pokemon\\\\public\\\\pokemon-local\"\" 2>nul || echo \"Directory not found \")",
+      "Bash(cd E:ProyectosApi evento pokemon)",
+      "Bash(curl:*)",
+      "mcp__mcp-registry__search_mcp_registry",
+      "Bash(ls:*)"
+    ]
+  }
+}
