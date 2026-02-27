@@ -1064,9 +1064,18 @@ function SorteoRoulette() {
             {/* History */}
             {history.length > 0 && (
                 <div className="card" style={{ marginTop: "var(--space-xl)", width: "100%", maxWidth: "500px" }}>
-                    <h4 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-primary)", marginBottom: "var(--space-md)" }}>
-                        Historial de Ganadores
-                    </h4>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-md)" }}>
+                        <h4 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-primary)" }}>
+                            Historial de Ganadores
+                        </h4>
+                        <button
+                            className="btn btn-small btn-danger"
+                            style={{ fontSize: "0.6rem", padding: "4px 10px" }}
+                            onClick={() => { if (confirm("¿Borrar todo el historial de ganadores?")) setHistory([]); }}
+                        >
+                            🗑️ Borrar historial
+                        </button>
+                    </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
                         {history.map((h, i) => (
                             <div key={i} style={{
