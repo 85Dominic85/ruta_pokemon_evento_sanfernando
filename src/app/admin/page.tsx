@@ -21,7 +21,7 @@ interface Metrics {
     capturesByPokemon: { pokemonId: number; _count: { pokemonId: number } }[];
 }
 
-type Tab = "metrics" | "participants" | "stops" | "mapa" | "verify";
+type Tab = "metrics" | "participants" | "stops" | "mapa" | "verify" | "sorteo";
 
 export default function AdminPage() {
     const router = useRouter();
@@ -235,7 +235,7 @@ export default function AdminPage() {
 
             {/* Tabs */}
             <div className="admin-tabs">
-                {(["metrics", "participants", "stops", "mapa", "verify"] as Tab[]).map((t) => (
+                {(["metrics", "participants", "stops", "mapa", "verify", "sorteo"] as Tab[]).map((t) => (
                     <button
                         key={t}
                         className={`admin-tab ${tab === t ? "active" : ""}`}
@@ -246,6 +246,7 @@ export default function AdminPage() {
                         {t === "stops" && "📍 Paradas"}
                         {t === "mapa" && "🗺️ Mapa"}
                         {t === "verify" && "✅ Verificar"}
+                        {t === "sorteo" && "🎰 Sorteo!"}
                     </button>
                 ))}
             </div>
@@ -435,6 +436,9 @@ export default function AdminPage() {
                     )}
                 </div>
             )}
+
+            {/* Sorteo Tab */}
+            {tab === "sorteo" && <SorteoRoulette />}
         </div>
     );
 }
@@ -784,6 +788,304 @@ function MapEditor() {
                     </tbody>
                 </table>
             </div>
+        </div>
+    );
+}
+
+type SorteoState = "idle" | "loading" | "ready" | "spinning" | "winner";
+
+interface SorteoParticipant {
+    email: string;
+    nick: string;
+}
+
+function SorteoRoulette() {
+    const [state, setState] = useState<SorteoState>("idle");
+    const [participants, setParticipants] = useState<SorteoParticipant[]>([]);
+    const [winner, setWinner] = useState<SorteoParticipant | null>(null);
+    const [history, setHistory] = useState<SorteoParticipant[]>([]);
+    const [error, setError] = useState("");
+    const [showConfetti, setShowConfetti] = useState(false);
+
+    const reelRef = useRef<HTMLDivElement>(null);
+    const animFrameRef = useRef<number>(0);
+
+    const ITEM_HEIGHT = 60;
+    const VISIBLE_ITEMS = 7;
+    const WINDOW_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
+
+    const loadParticipants = useCallback(async () => {
+        setState("loading");
+        setError("");
+        try {
+            const res = await fetch("/api/admin/sorteo/emails", { credentials: "include" });
+            const data = await res.json();
+            if (data.ok && data.participants.length > 0) {
+                setParticipants(data.participants);
+                setState("ready");
+            } else if (data.ok && data.participants.length === 0) {
+                setError("No hay participantes inscritos.");
+                setState("idle");
+            } else {
+                setError(data.error || "Error al cargar participantes");
+                setState("idle");
+            }
+        } catch {
+            setError("Error de conexión");
+            setState("idle");
+        }
+    }, []);
+
+    // Build the reel list - triplicate for infinite scroll effect
+    const reelList = (() => {
+        if (participants.length === 0) return [];
+        let list = [...participants];
+        // Ensure we have enough items to fill the window
+        while (list.length < VISIBLE_ITEMS * 2) {
+            list = [...list, ...participants];
+        }
+        // Triplicate for seamless scrolling
+        return [...list, ...list, ...list];
+    })();
+
+    const spin = useCallback(() => {
+        if (state !== "ready" && state !== "winner") return;
+        if (participants.length === 0) return;
+
+        setState("spinning");
+        setWinner(null);
+        setShowConfetti(false);
+
+        // Pick winner using crypto.getRandomValues
+        const arr = new Uint32Array(1);
+        crypto.getRandomValues(arr);
+        const winnerIndex = arr[0] % participants.length;
+        const chosenWinner = participants[winnerIndex];
+
+        const reel = reelRef.current;
+        if (!reel) return;
+
+        // Calculate target position - land on the winner in the middle set
+        let baseList = [...participants];
+        while (baseList.length < VISIBLE_ITEMS * 2) {
+            baseList = [...baseList, ...participants];
+        }
+        const singleSetLength = baseList.length;
+
+        // Find the winner position in the second set (middle) and center it in the window
+        let targetItemIndex = singleSetLength; // start of second set
+        // Find the first occurrence of winnerIndex pattern in the base list
+        for (let i = 0; i < singleSetLength; i++) {
+            if (baseList[i].email === chosenWinner.email) {
+                targetItemIndex = singleSetLength + i;
+                break;
+            }
+        }
+        // Center the winner in the visible window
+        const centerOffset = Math.floor(VISIBLE_ITEMS / 2);
+        const targetOffset = (targetItemIndex - centerOffset) * ITEM_HEIGHT;
+
+        // Animation params
+        const startTime = performance.now();
+        const PHASE1_DURATION = 2000; // constant speed
+        const PHASE2_DURATION = 3000; // deceleration
+        const TOTAL_DURATION = PHASE1_DURATION + PHASE2_DURATION;
+
+        // During phase 1, scroll fast. We want to cover a lot of distance.
+        const totalReelHeight = reelList.length * ITEM_HEIGHT;
+        const fastSpeed = totalReelHeight * 0.8; // pixels per second in phase 1
+        const phase1Distance = fastSpeed * (PHASE1_DURATION / 1000);
+
+        // Ensure we end at targetOffset - add enough full cycles
+        const minDistance = phase1Distance + totalReelHeight;
+        const fullCycles = Math.ceil((minDistance) / totalReelHeight);
+        const finalTarget = targetOffset + fullCycles * totalReelHeight;
+
+        // Start from 0
+        reel.style.transform = `translateY(0px)`;
+
+        const animate = (now: number) => {
+            const elapsed = now - startTime;
+
+            if (elapsed >= TOTAL_DURATION) {
+                // Snap to final position (modular within reel)
+                const finalY = targetOffset % totalReelHeight;
+                reel.style.transform = `translateY(-${finalY}px)`;
+
+                setWinner(chosenWinner);
+                setHistory((prev) => [chosenWinner, ...prev]);
+                setState("winner");
+                setShowConfetti(true);
+                setTimeout(() => setShowConfetti(false), 4000);
+                return;
+            }
+
+            let currentY: number;
+
+            if (elapsed <= PHASE1_DURATION) {
+                // Phase 1: constant high speed
+                const progress = elapsed / PHASE1_DURATION;
+                currentY = progress * phase1Distance;
+            } else {
+                // Phase 2: cubic ease-out deceleration
+                const phase2Elapsed = elapsed - PHASE1_DURATION;
+                const t = phase2Elapsed / PHASE2_DURATION;
+                // Cubic ease-out: 1 - (1-t)^3
+                const eased = 1 - Math.pow(1 - t, 3);
+                const phase2Distance = finalTarget - phase1Distance;
+                currentY = phase1Distance + eased * phase2Distance;
+            }
+
+            // Modular wrap for infinite scroll
+            const wrappedY = currentY % totalReelHeight;
+            reel.style.transform = `translateY(-${wrappedY}px)`;
+
+            animFrameRef.current = requestAnimationFrame(animate);
+        };
+
+        animFrameRef.current = requestAnimationFrame(animate);
+    }, [state, participants, reelList.length, ITEM_HEIGHT, VISIBLE_ITEMS, WINDOW_HEIGHT]);
+
+    // Cleanup animation frame on unmount
+    useEffect(() => {
+        return () => {
+            if (animFrameRef.current) {
+                cancelAnimationFrame(animFrameRef.current);
+            }
+        };
+    }, []);
+
+    // IDLE state - show load button
+    if (state === "idle") {
+        return (
+            <div className="sorteo-container">
+                <h2 className="sorteo-title">SORTEO POKEMON!</h2>
+                <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-lg)", fontSize: "0.9rem", textAlign: "center" }}>
+                    Carga la lista de participantes para iniciar el sorteo
+                </p>
+                {error && <p style={{ color: "var(--color-error)", marginBottom: "var(--space-md)", fontSize: "0.85rem" }}>{error}</p>}
+                <button className="sorteo-spin-btn" onClick={loadParticipants}>
+                    CARGAR PARTICIPANTES
+                </button>
+            </div>
+        );
+    }
+
+    // LOADING state
+    if (state === "loading") {
+        return (
+            <div className="sorteo-container">
+                <h2 className="sorteo-title">SORTEO POKEMON!</h2>
+                <div className="loading-spinner" />
+                <p style={{ color: "var(--color-text-muted)", fontSize: "0.85rem" }}>Cargando participantes...</p>
+            </div>
+        );
+    }
+
+    // READY / SPINNING / WINNER states
+    return (
+        <div className="sorteo-container">
+            <h2 className="sorteo-title">SORTEO POKEMON!</h2>
+            <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-md)", fontSize: "0.85rem", textAlign: "center" }}>
+                {participants.length} participantes cargados
+            </p>
+
+            {/* Slot machine */}
+            <div className="sorteo-machine">
+                <div className="sorteo-pointer sorteo-pointer-left">&#9654;</div>
+                <div className="sorteo-window" style={{ height: WINDOW_HEIGHT }}>
+                    <div className="sorteo-reel" ref={reelRef}>
+                        {reelList.map((p, i) => (
+                            <div
+                                key={i}
+                                className={`sorteo-item ${winner && p.email === winner.email && state === "winner" ? "sorteo-item-winner" : ""}`}
+                                style={{ height: ITEM_HEIGHT }}
+                            >
+                                <span className="sorteo-item-nick">{p.nick}</span>
+                                <span className="sorteo-item-email">{p.email}</span>
+                            </div>
+                        ))}
+                    </div>
+                    {/* Center selection line */}
+                    <div className="sorteo-center-line" />
+                </div>
+                <div className="sorteo-pointer sorteo-pointer-right">&#9664;</div>
+            </div>
+
+            {/* Spin button */}
+            <div style={{ display: "flex", gap: "var(--space-md)", marginTop: "var(--space-lg)", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                    className="sorteo-spin-btn"
+                    onClick={spin}
+                    disabled={state === "spinning"}
+                >
+                    {state === "spinning" ? "GIRANDO..." : state === "winner" ? "GIRAR DE NUEVO!" : "GIRAR!"}
+                </button>
+                <button
+                    className="btn btn-small btn-secondary"
+                    onClick={loadParticipants}
+                    disabled={state === "spinning"}
+                    style={{ alignSelf: "center" }}
+                >
+                    🔄 Recargar
+                </button>
+            </div>
+
+            {/* Winner banner */}
+            {state === "winner" && winner && (
+                <div className="sorteo-winner-banner animate-bounce-in">
+                    <div className="sorteo-winner-label">GANADOR/A</div>
+                    <div className="sorteo-winner-nick">{winner.nick}</div>
+                    <div className="sorteo-winner-email">{winner.email}</div>
+                </div>
+            )}
+
+            {/* Confetti */}
+            {showConfetti && (
+                <div className="confetti-container">
+                    {Array.from({ length: 40 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="confetti-piece"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 2}s`,
+                                animationDuration: `${2 + Math.random() * 2}s`,
+                                background: ["#FFCB05", "#FF0000", "#3B4CCA", "#4ade80", "#f87171", "#fff"][i % 6],
+                                borderRadius: i % 3 === 0 ? "50%" : "2px",
+                                width: `${6 + Math.random() * 8}px`,
+                                height: `${6 + Math.random() * 8}px`,
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* History */}
+            {history.length > 0 && (
+                <div className="card" style={{ marginTop: "var(--space-xl)", width: "100%", maxWidth: "500px" }}>
+                    <h4 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.6rem", color: "var(--color-primary)", marginBottom: "var(--space-md)" }}>
+                        Historial de Ganadores
+                    </h4>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+                        {history.map((h, i) => (
+                            <div key={i} style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "var(--space-sm) var(--space-md)",
+                                background: i === 0 ? "rgba(255, 203, 5, 0.1)" : "transparent",
+                                borderRadius: "var(--radius-sm)",
+                                fontSize: "0.85rem",
+                            }}>
+                                <span style={{ color: "var(--color-primary)", fontWeight: 600 }}>#{history.length - i}</span>
+                                <span style={{ fontWeight: 600 }}>{h.nick}</span>
+                                <span style={{ color: "var(--color-text-muted)", fontSize: "0.75rem" }}>{h.email}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
