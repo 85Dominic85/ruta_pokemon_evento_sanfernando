@@ -49,6 +49,18 @@ export default function LegalPage() {
 
                     <section>
                         <h2 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.65rem", color: "var(--color-primary)", marginBottom: "var(--space-sm)" }}>
+                            Promociones de El Dragón Rojo
+                        </h2>
+                        <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", lineHeight: 1.8 }}>
+                            El correo electrónico con el que te registres podrá ser utilizado por El Dragón Rojo
+                            para enviarte información sobre futuras promociones, eventos y ofertas especiales.
+                            Si en algún momento deseas dejar de recibir estas comunicaciones, puedes solicitarlo
+                            contactando directamente con El Dragón Rojo.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 style={{ fontFamily: "var(--font-pixel)", fontSize: "0.65rem", color: "var(--color-primary)", marginBottom: "var(--space-sm)" }}>
                             Propiedad Intelectual
                         </h2>
                         <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", lineHeight: 1.8 }}>

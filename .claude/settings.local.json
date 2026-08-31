@@ -24,7 +24,10 @@
       "mcp__mcp-registry__search_mcp_registry",
       "Bash(ls:*)",
       "Bash(head:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(file:*)",
+      "Bash(git status:*)",
+      "Bash(git push:*)"
     ]
   }
 }
